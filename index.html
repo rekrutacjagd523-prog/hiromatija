@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ Palmis — Palm Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&display=swap&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+<style>
+:root {
+  --ink:    #06030F;
+  --void:   #0B0618;
+  --card:   rgba(14, 8, 28, 0.88);
+  --gold:   #C6994A;
+  --gold-l: #E8CC80;
+  --gold-d: #6B4F1A;
+  --cream:  #EDE3C8;
+  --muted:  #8A7A5A;
+  --dim:    #3A2E1A;
+  --ruby:   #8C1C1C;
+  --indigo: #2A1860;
+  --teal:   #0F5050;
+  --r: 10px;
+  --shadow: 0 8px 48px rgba(0,0,0,.7);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── CANVAS STARFIELD ─── */
+#stars {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: .9;
+}
+
+/* ─── AMBIENT GLOW LAYERS ─── */
+.ambient {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 15%, rgba(42,24,96,.35) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 55% at 85% 85%, rgba(140,28,28,.22) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(15,80,80,.15) 0%, transparent 60%);
+}
+
+/* ─── NOISE GRAIN ─── */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+}
+
+/* ─── LAYOUT ─── */
+.wrap { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; padding: 0 16px 80px; }
+
+/* ─── LANG SWITCHER ─── */
+.lang-bar {
+  display: flex; justify-content: flex-end; gap: 4px;
+  padding: 14px 0 0;
+}
+.lang-btn {
+  background: transparent;
+  border: 1px solid rgba(198,153,74,.2);
+  color: var(--muted);
+  font-family: 'Cinzel', serif;
+  font-size: .65rem; letter-spacing: .12em;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer;
+  transition: all .2s;
+}
+.lang-btn.active, .lang-btn:hover {
+  border-color: var(--gold); color: var(--gold);
+  background: rgba(198,153,74,.08);
+}
+
+/* ─── HEADER ─── */
+header { text-align: center; padding: 36px 0 28px; }
+
+.sigil {
+  width: 72px; height: 72px; margin: 0 auto 18px;
+  animation: levitate 5s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(198,153,74,.45));
+}
+@keyframes levitate {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.6rem, 6vw, 2.8rem);
+  letter-spacing: .1em;
+  background: linear-gradient(160deg, var(--gold-l) 0%, var(--gold) 45%, #A07830 70%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.tagline {
+  font-family: 'Cinzel', serif;
+  font-size: .72rem; letter-spacing: .32em;
+  color: var(--muted); text-transform: uppercase;
+}
+
+.header-rule {
+  display: flex; align-items: center; gap: 14px;
+  margin: 22px auto 0; max-width: 320px;
+  color: var(--gold-d);
+}
+.header-rule::before, .header-rule::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-d));
+}
+.header-rule::after { background: linear-gradient(90deg, var(--gold-d), transparent); }
+.header-rule span { font-size: .9rem; letter-spacing: .15em; white-space: nowrap; }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--card);
+  border: 1px solid rgba(198,153,74,.14);
+  border-radius: var(--r);
+  padding: 28px 24px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(145deg, rgba(198,153,74,.04) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: .65rem; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(198,153,74,.3), transparent);
+}
+
+/* ─── UPLOAD ZONE ─── */
+#drop-zone {
+  border: 1.5px dashed rgba(198,153,74,.28);
+  border-radius: 8px;
+  padding: 42px 24px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+  background: rgba(198,153,74,.02);
+}
+#drop-zone:hover, #drop-zone.over {
+  border-color: var(--gold);
+  background: rgba(198,153,74,.05);
+  box-shadow: 0 0 40px rgba(198,153,74,.08), inset 0 0 30px rgba(198,153,74,.03);
+}
+#file-in {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  /* iOS Safari: input must have explicit size to be tappable */
+  width: 100%; height: 100%;
+  font-size: 16px; /* prevents iOS zoom on focus */
+}
+.drop-icon {
+  font-size: 2.8rem; display: block; margin-bottom: 14px;
+  filter: drop-shadow(0 0 10px rgba(198,153,74,.5));
+  animation: pulse-icon 3s ease-in-out infinite;
+}
+@keyframes pulse-icon { 0%,100%{filter:drop-shadow(0 0 8px rgba(198,153,74,.3))} 50%{filter:drop-shadow(0 0 18px rgba(198,153,74,.7))} }
+
+.drop-title {
+  font-family: 'Cinzel', serif; font-size: .95rem;
+  color: var(--gold-l); letter-spacing: .08em; margin-bottom: 6px;
+}
+.drop-hint { color: var(--muted); font-size: .82rem; font-style: italic; }
+
+/* preview */
+#preview-box { display: none; text-align: center; }
+#prev-img {
+  max-width: 100%; max-height: 280px; border-radius: 8px;
+  border: 1px solid rgba(198,153,74,.25);
+  box-shadow: 0 4px 30px rgba(140,28,28,.25);
+  display: block; margin: 0 auto;
+}
+.rm-btn {
+  background: none; border: 1px solid rgba(198,153,74,.2); color: var(--muted);
+  padding: 6px 18px; border-radius: 20px; cursor: pointer; margin-top: 12px;
+  font-family: 'Cinzel', serif; font-size: .65rem; letter-spacing: .12em;
+  transition: all .2s;
+}
+.rm-btn:hover { border-color: #C0392B; color: #C0392B; }
+
+/* ─── OFFER CARD ─── */
+#offer-card { display: none; }
+
+.price-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, rgba(198,153,74,.16), rgba(198,153,74,.06));
+  border: 1px solid rgba(198,153,74,.4);
+  border-radius: 8px; padding: 11px 22px; margin-bottom: 22px;
+  box-shadow: 0 0 24px rgba(198,153,74,.1);
+}
+.price-amount {
+  font-family: 'Cinzel', serif; color: var(--gold-l); font-size: 1.35rem;
+  letter-spacing: .06em;
+}
+.price-desc { color: var(--muted); font-size: .82rem; }
+
+.perks { list-style: none; margin-bottom: 26px; }
+.perks li {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 5px 0; font-size: .9rem; color: var(--muted);
+}
+.perks li::before { content: '✦'; color: var(--gold); font-size: .65rem; margin-top: 5px; flex-shrink: 0; }
+
+.rune-strip {
+  text-align: center; color: var(--gold-d); font-size: 1rem;
+  letter-spacing: .45em; margin: 16px 0 24px; opacity: .55;
+  user-select: none;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  width: 100%; padding: 15px 20px; border: none; border-radius: 8px;
+  cursor: pointer; font-family: 'Cinzel', serif;
+  font-size: .88rem; letter-spacing: .14em; text-transform: uppercase;
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.btn-gold {
+  background: linear-gradient(120deg, #7A500F 0%, #C6994A 40%, #E8CC80 60%, #C6994A 80%, #7A500F 100%);
+  background-size: 250% 100%; background-position: 0% 50%;
+  color: #1A0C00; font-weight: 600;
+  box-shadow: 0 4px 24px rgba(198,153,74,.28);
+}
+.btn-gold:not(:disabled):hover {
+  background-position: 100% 50%;
+  box-shadow: 0 6px 36px rgba(198,153,74,.48);
+  transform: translateY(-1px);
+}
+.btn-gold:not(:disabled):active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(198,153,74,.22);
+  color: var(--muted); margin-top: 10px;
+  font-size: .78rem;
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--cream); }
+
+/* ─── STRIPE MODAL ─── */
+#stripe-modal {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(6,3,15,.88); backdrop-filter: blur(10px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+#stripe-modal.open { display: flex; }
+
+.modal-inner {
+  background: linear-gradient(145deg, #100828, #180D38);
+  border: 1px solid rgba(198,153,74,.28);
+  border-radius: 16px; padding: 36px 30px;
+  max-width: 440px; width: 100%;
+  box-shadow: 0 0 80px rgba(42,24,96,.5), var(--shadow);
+  animation: pop-in .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pop-in {
+  from { opacity:0; transform: scale(.9) translateY(24px); }
+  to   { opacity:1; transform: none; }
+}
+
+.modal-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 1.15rem; color: var(--gold); text-align: center; margin-bottom: 4px;
+}
+.modal-sub { color: var(--muted); text-align: center; font-size: .82rem; margin-bottom: 28px; font-style: italic; }
+
+/* Stripe Element container */
+#card-element {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(198,153,74,.22);
+  border-radius: 7px; padding: 14px;
+  transition: border-color .2s;
+  margin-bottom: 18px;
+}
+#card-element.focused { border-color: var(--gold); box-shadow: 0 0 14px rgba(198,153,74,.18); }
+#card-errors { color: #E06060; font-size: .82rem; min-height: 20px; margin-bottom: 14px; }
+
+.secure-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  color: var(--muted); font-size: .72rem; margin-bottom: 22px;
+  font-family: 'Cinzel', serif; letter-spacing: .08em;
+}
+
+.btn-cancel { background: none; border: none; color: var(--muted); cursor: pointer;
+  width: 100%; padding: 10px; font-family: 'Cinzel', serif; font-size: .72rem;
+  letter-spacing: .12em; margin-top: 10px; transition: color .2s; }
+.btn-cancel:hover { color: var(--cream); }
+
+/* ─── LOADING ─── */
+#loading-view { display: none; padding: 60px 20px; text-align: center; }
+
+.orb {
+  width: 90px; height: 90px; margin: 0 auto 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, rgba(160,120,220,.5) 0%, rgba(60,20,120,.65) 45%, rgba(8,4,20,.9) 100%);
+  border: 1.5px solid rgba(198,153,74,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 0 40px rgba(80,30,160,.45), inset 0 0 24px rgba(80,40,160,.3);
+  animation: orb-pulse 2.4s ease-in-out infinite;
+}
+@keyframes orb-pulse {
+  0%,100% { box-shadow: 0 0 40px rgba(80,30,160,.45), inset 0 0 24px rgba(80,40,160,.3); }
+  50%      { box-shadow: 0 0 80px rgba(120,60,220,.65), inset 0 0 50px rgba(100,50,200,.45); }
+}
+
+.load-title {
+  font-family: 'Cinzel', serif; color: var(--gold);
+  font-size: 1.05rem; letter-spacing: .18em;
+  animation: text-pulse 1.8s ease-in-out infinite;
+}
+@keyframes text-pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+.load-sub { color: var(--muted); font-size: .85rem; margin-top: 8px; font-style: italic; }
+
+/* ─── RESULT ─── */
+#result-view { display: none; }
+
+.result-hero {
+  text-align: center; padding: 28px 0 18px;
+}
+.result-crown {
+  font-size: 2rem; margin-bottom: 8px;
+  animation: levitate 4s ease-in-out infinite;
+  display: block;
+}
+.result-headline {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  background: linear-gradient(135deg, var(--gold-l), var(--gold));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: .06em; margin-bottom: 4px;
+}
+
+/* Palm + overlay */
+.palm-stage {
+  position: relative; display: inline-block;
+  max-width: 300px; width: 100%;
+  margin: 0 auto 20px; display: block;
+  text-align: center;
+}
+.palm-stage .inner {
+  position: relative; display: inline-block;
+  max-width: 300px; width: 100%;
+}
+#r-palm { width: 100%; border-radius: 8px;
+  border: 1px solid rgba(198,153,74,.25);
+  filter: saturate(.65) brightness(.75);
+  display: block;
+}
+#r-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+/* Legend pills */
+.legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 22px; }
+.lpill {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em;
+  color: var(--muted);
+}
+.ldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* Reading cards */
+.r-grid { display: grid; gap: 14px; margin-bottom: 20px; }
+
+.r-card {
+  background: rgba(8,4,18,.65);
+  border: 1px solid rgba(198,153,74,.1);
+  border-left: 3px solid var(--lc, var(--gold));
+  border-radius: 8px; padding: 20px 20px 18px;
+  opacity: 0; transform: translateX(-16px);
+  animation: slide-in .45s ease forwards;
+  cursor: default;
+  transition: box-shadow .2s, border-color .2s;
+}
+.r-card:hover {
+  box-shadow: -4px 0 22px rgba(198,153,74,.1);
+  border-color: rgba(198,153,74,.18);
+  border-left-color: var(--lc, var(--gold));
+}
+@keyframes slide-in { to { opacity:1; transform:none; } }
+
+.r-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+.r-badge {
+  font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .14em;
+  padding: 3px 11px; border-radius: 3px;
+  color: var(--lc, var(--gold));
+  border: 1px solid currentColor;
+  background: rgba(from var(--lc) r g b / .1);
+  white-space: nowrap;
+}
+
+.r-keys {
+  font-family: 'Cinzel', serif; font-size: .65rem;
+  color: var(--muted); letter-spacing: .06em;
+}
+
+.r-text {
+  color: var(--muted); font-size: .9rem; line-height: 1.75; font-style: italic;
+}
+.r-text em { color: var(--gold-l); font-style: normal; }
+
+/* Compat chips */
+.compat-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.chip {
+  background: rgba(42,24,96,.4); border: 1px solid rgba(100,60,180,.25);
+  color: #C4A0E8; border-radius: 20px; padding: 4px 13px;
+  font-family: 'Cinzel', serif; font-size: .65rem; letter-spacing: .07em;
+}
+
+/* Numerology grid */
+.num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.num-cell {
+  background: rgba(15,80,80,.15); border: 1px solid rgba(15,80,80,.3);
+  border-radius: 7px; padding: 12px 8px; text-align: center;
+}
+.num-big { font-family: 'Cinzel', serif; font-size: 1.6rem; color: #70D0D0; }
+.num-lbl { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .1em; color: var(--muted); margin-top: 4px; }
+.num-meaning { color: var(--muted); font-size: .82rem; margin-top: 12px; font-style: italic; }
+
+/* Fate box */
+.fate-box {
+  background: linear-gradient(135deg, rgba(140,28,28,.12), rgba(42,24,96,.1));
+  border: 1px solid rgba(140,28,28,.28);
+  border-radius: 8px; padding: 22px; text-align: center; margin-top: 10px;
+}
+.fate-stars { color: var(--gold); letter-spacing: .25em; font-size: 1rem; margin-bottom: 12px; }
+.fate-words {
+  font-family: 'Cinzel', serif; color: var(--gold-l);
+  font-size: .92rem; line-height: 1.7; letter-spacing: .03em;
+}
+
+/* Action row */
+.action-row { display: flex; gap: 10px; margin-top: 22px; }
+.act-btn {
+  flex: 1; padding: 12px; border-radius: 7px; cursor: pointer;
+  font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .1em;
+  transition: all .2s; border: 1px solid transparent;
+}
+.act-save {
+  background: rgba(198,153,74,.12); border-color: rgba(198,153,74,.35); color: var(--gold);
+}
+.act-save:hover { background: rgba(198,153,74,.2); }
+.act-new {
+  background: rgba(42,24,96,.25); border-color: rgba(100,60,180,.25); color: #C4A0E8;
+}
+.act-new:hover { background: rgba(42,24,96,.45); }
+
+.disclaimer {
+  text-align: center; color: var(--muted); font-size: .7rem;
+  font-style: italic; margin-top: 30px; opacity: .5; line-height: 1.65;
+}
+
+/* ─── TOAST ─── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: rgba(14,8,28,.97); border: 1px solid rgba(198,153,74,.3);
+  color: var(--cream); padding: 12px 26px; border-radius: 8px;
+  font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .1em;
+  opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 300;
+  white-space: nowrap; box-shadow: 0 4px 24px rgba(0,0,0,.6);
+}
+#toast.show { opacity: 1; }
+
+/* Delay each reading card */
+.r-card:nth-child(1){animation-delay:.08s}
+.r-card:nth-child(2){animation-delay:.18s}
+.r-card:nth-child(3){animation-delay:.28s}
+.r-card:nth-child(4){animation-delay:.38s}
+.r-card:nth-child(5){animation-delay:.48s}
+.r-card:nth-child(6){animation-delay:.58s}
+.r-card:nth-child(7){animation-delay:.68s}
+.r-card:nth-child(8){animation-delay:.78s}
+
+@media (max-width: 460px) {
+  .card { padding: 20px 16px; }
+  .modal-inner { padding: 28px 20px; }
+}
+
+/* ─── MOBILE CRITICAL FIXES ─── */
+/* Prevent iOS rubber-band scroll breaking fixed elements */
+html, body { height: 100%; }
+body { -webkit-overflow-scrolling: touch; }
+
+/* Larger touch targets on mobile */
+@media (max-width: 600px) {
+  .btn { padding: 17px 20px; font-size: .92rem; }
+  .lang-btn { padding: 7px 13px; font-size: .7rem; }
+  .act-btn { padding: 14px 8px; font-size: .68rem; }
+  .rm-btn { padding: 10px 20px; }
+
+  /* Modal full-screen on small phones */
+  #stripe-modal { align-items: flex-end; padding: 0; }
+  .modal-inner {
+    border-radius: 16px 16px 0 0;
+    padding: 28px 20px 36px;
+    width: 100%; max-width: 100%;
+    /* safe area for iPhones with notch */
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+
+  /* Prevent modal scrolling issues */
+  #stripe-modal.open { overflow-y: auto; }
+
+  .drop-icon { font-size: 2.4rem; }
+  h1 { font-size: clamp(1.3rem, 7vw, 2rem); }
+  .price-pill { flex-direction: column; gap: 4px; text-align: center; }
+}
+
+/* Prevent tap highlight flash on iOS */
+.btn, .lang-btn, .act-btn, .rm-btn, #drop-zone, .r-card {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="ambient"></div>
+<div class="grain"></div>
+
+<div class="wrap">
+
+  <!-- LANG BAR -->
+  <div class="lang-bar">
+    <button class="lang-btn active" onclick="setLang('ru')">РУС</button>
+    <button class="lang-btn" onclick="setLang('en')">ENG</button>
+    <button class="lang-btn" onclick="setLang('pl')">POL</button>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="sigil">
+      <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- outer ring -->
+        <circle cx="36" cy="36" r="33" stroke="#C6994A" stroke-width=".8" opacity=".4"/>
+        <!-- triangle -->
+        <polygon points="36,6 66,54 6,54" stroke="#C6994A" stroke-width=".9" fill="none" opacity=".35"/>
+        <!-- eye -->
+        <ellipse cx="36" cy="36" rx="18" ry="11" stroke="#C6994A" stroke-width="1.2" fill="none"/>
+        <circle cx="36" cy="36" r="6.5" fill="rgba(198,153,74,.15)" stroke="#C6994A" stroke-width="1"/>
+        <circle cx="36" cy="36" r="2.8" fill="#C6994A"/>
+        <circle cx="34.2" cy="34.3" r="1.1" fill="rgba(255,255,200,.7)"/>
+        <!-- tick marks -->
+        <line x1="36" y1="3" x2="36" y2="8" stroke="#C6994A" stroke-width=".7" opacity=".5"/>
+        <line x1="36" y1="64" x2="36" y2="69" stroke="#C6994A" stroke-width=".7" opacity=".5"/>
+        <line x1="3" y1="36" x2="8" y2="36" stroke="#C6994A" stroke-width=".7" opacity=".5"/>
+        <line x1="64" y1="36" x2="69" y2="36" stroke="#C6994A" stroke-width=".7" opacity=".5"/>
+      </svg>
+    </div>
+    <h1 id="h-title">Мистика Ладони</h1>
+    <p class="tagline" id="h-tag">Древняя Мудрость · Хиромантия · Судьба</p>
+    <div class="header-rule"><span>✦ ✦ ✦</span></div>
+  </header>
+
+  <!-- UPLOAD -->
+  <div class="card" id="upload-card">
+    <div class="section-label" id="lbl-upload">✦ Изображение ладони</div>
+    <div id="drop-zone">
+      <input type="file" id="file-in" accept="image/*">
+      <span class="drop-icon">🤚</span>
+      <p class="drop-title" id="drop-title">Загрузи фото ладони</p>
+      <p class="drop-hint" id="drop-hint">JPG, PNG, WEBP · хорошее освещение, чистый фон</p>
+    </div>
+    <div id="preview-box">
+      <img id="prev-img" alt="palm preview">
+      <button class="rm-btn" onclick="removeImg()" id="rm-btn">✕ Удалить</button>
+    </div>
+  </div>
+
+  <!-- OFFER -->
+  <div class="card" id="offer-card">
+    <div class="section-label" id="lbl-offer">✦ Полное Прочтение</div>
+    <div class="price-pill">
+      <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
+      <div>
+        <div class="price-amount">$5.00</div>
+        <div class="price-desc" id="price-desc">Одно полное прочтение</div>
+      </div>
+      <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
+    </div>
+    <ul class="perks" id="perks-list">
+      <li>5 линий ладони с подробным толкованием</li>
+      <li>Предсказание судьбы и жизненного пути</li>
+      <li>Совместимость с знаками Зодиака</li>
+      <li>Нумерология пальцев (числа жизни, души, судьбы)</li>
+      <li>Ладонь с нанесёнными линиями и легендой</li>
+      <li>Персональное мистическое послание</li>
+    </ul>
+    <div class="rune-strip">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ</div>
+    <button class="btn btn-gold" onclick="openStripe()" id="btn-pay">
+      🔮 Открыть Тайну — $5
+    </button>
+    <button class="btn btn-ghost" onclick="runDemo()" id="btn-demo">
+      Демо-режим (без оплаты)
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading-view">
+    <div class="orb">🔮</div>
+    <div class="load-title" id="load-title">Звёзды читают линии...</div>
+    <div class="load-sub" id="load-sub">Духи древних хиромантов пробуждаются</div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-view">
+    <div class="result-hero">
+      <span class="result-crown">👁</span>
+      <div class="result-headline" id="r-headline">✦ Твоя Судьба Раскрыта ✦</div>
+      <p class="tagline" id="r-tagline" style="font-size:.68rem">Послание написано в линиях твоей ладони</p>
+    </div>
+
+    <!-- Palm with drawn lines -->
+    <div class="palm-stage">
+      <div class="inner">
+        <img id="r-palm" alt="palm">
+        <canvas id="r-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="legend" id="r-legend"></div>
+
+    <div class="r-grid" id="r-grid"></div>
+
+    <div class="action-row">
+      <button class="act-btn act-save" onclick="showToast(T('saved'))" id="act-save">📜 Сохранить</button>
+      <button class="act-btn act-new" onclick="resetAll()" id="act-new">✦ Новое</button>
+    </div>
+
+    <p class="disclaimer" id="disclaimer">
+      Хиромантия — искусство самопознания. Результаты носят развлекательный характер.
+    </p>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- STRIPE MODAL -->
+<div id="stripe-modal">
+  <div class="modal-inner">
+    <div class="modal-title" id="m-title">🔮 Оплата Прочтения</div>
+    <div class="modal-sub" id="m-sub">Безопасная оплата через Stripe · Мгновенный результат</div>
+    <div id="card-element"></div>
+    <div id="card-errors"></div>
+    <div class="secure-row">🔒 <span id="m-secure">256-bit SSL · Защищено Stripe</span></div>
+    <button class="btn btn-gold" id="submit-pay" onclick="submitPayment()">
+      <span id="pay-btn-text">Оплатить $5 и Открыть Тайну</span>
+    </button>
+    <button class="btn-cancel" onclick="closeStripe()" id="m-cancel">Отмена</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// STARFIELD
+// ══════════════════════════════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('stars');
+  const cx = cv.getContext('2d');
+  let W, H, stars = [];
+  function init(){
+    W = cv.width = window.innerWidth;
+    H = cv.height = window.innerHeight;
+    stars = Array.from({length: 220}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.4+.2,
+      lo: Math.random()*.12+.03,
+      hi: Math.random()*.55+.2,
+      dur: (Math.random()*3+2)*1000,
+      t:   Math.random()*8000
+    }));
+  }
+  init();
+  window.addEventListener('resize', init);
+  (function draw(ts){
+    cx.clearRect(0,0,W,H);
+    stars.forEach(s=>{
+      const a = s.lo + (s.hi-s.lo)*(0.5 - 0.5*Math.cos((ts-s.t)/s.dur*Math.PI*2));
+      cx.beginPath(); cx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      cx.fillStyle = `rgba(255,248,210,${a})`; cx.fill();
+    });
+    requestAnimationFrame(draw);
+  })(0);
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════════════════════
+const LANGS = {
+  ru: {
+    'h-title':    'Мистика Ладони',
+    'h-tag':      'Древняя Мудрость · Хиромантия · Судьба',
+    'lbl-upload': '✦ Изображение ладони',
+    'drop-title': 'Загрузи фото ладони',
+    'drop-hint':  'JPG, PNG, WEBP · хорошее освещение, чистый фон',
+    'rm-btn':     '✕ Удалить',
+    'lbl-offer':  '✦ Полное Прочтение',
+    'price-desc': 'Одно полное прочтение',
+    'btn-pay':    '🔮 Открыть Тайну — $5',
+    'btn-demo':   'Демо-режим (без оплаты)',
+    'load-msgs':  [
+      ['Звёзды читают линии...','Духи древних хиромантов пробуждаются'],
+      ['Древние руны оживают...','Каждая линия — страница книги судьбы'],
+      ['Вселенная шепчет ответы...','Планеты выстраиваются в твой знак'],
+      ['Тайны раскрываются...','Послание передаётся сквозь тысячелетия'],
+      ['Карта жизни проявляется...','Судьба написана с рождения'],
+    ],
+    'r-headline': '✦ Твоя Судьба Раскрыта ✦',
+    'r-tagline':  'Послание написано в линиях твоей ладони',
+    'm-title':    '🔮 Оплата Прочтения',
+    'm-sub':      'Безопасная оплата через Stripe · Мгновенный результат',
+    'm-secure':   '256-bit SSL · Защищено Stripe',
+    'pay-btn-text':'Оплатить $5 и Открыть Тайну',
+    'm-cancel':   'Отмена',
+    'act-save':   '📜 Сохранить',
+    'act-new':    '✦ Новое',
+    'disclaimer': 'Хиромантия — искусство самопознания. Результаты носят развлекательный характер.',
+    'perks': [
+      '5 линий ладони с подробным толкованием',
+      'Предсказание судьбы и жизненного пути',
+      'Совместимость с знаками Зодиака',
+      'Нумерология пальцев (числа жизни, души, судьбы)',
+      'Ладонь с нанесёнными линиями и легендой',
+      'Персональное мистическое послание',
+    ],
+    'saved': '📜 Сохранено! (функция в разработке)',
+    'no-img-err': 'Изображение не найдено — используем демо-режим',
+    'pay-err':    'Ошибка оплаты. Проверьте данные карты.',
+    'n-life':   'Число Жизни',
+    'n-soul':   'Число Души',
+    'n-dest':   'Число Судьбы',
+    'compat-lbl': 'Совместимость Зодиака',
+    'compat-txt': 'По линиям ладони твоя аура резонирует с этими знаками:',
+    'num-lbl':    'Нумерология Ладони',
+    'fate-lbl':   '✦ Послание Судьбы',
+  },
+  en: {
+    'h-title':    'Palm Mystic',
+    'h-tag':      'Ancient Wisdom · Palmistry · Destiny',
+    'lbl-upload': '✦ Palm Image',
+    'drop-title': 'Upload your palm photo',
+    'drop-hint':  'JPG, PNG, WEBP · good light, clean background',
+    'rm-btn':     '✕ Remove',
+    'lbl-offer':  '✦ Full Reading',
+    'price-desc': 'One complete reading',
+    'btn-pay':    '🔮 Reveal Destiny — $5',
+    'btn-demo':   'Demo mode (no payment)',
+    'load-msgs':  [
+      ['Stars are reading your lines...','Ancient palmists awaken across centuries'],
+      ['Ancient runes come alive...','Each line is a page of fate\'s great book'],
+      ['The universe whispers answers...','Planets align to your sign'],
+      ['Secrets unfold...','A message transcends a thousand years'],
+      ['Life map appearing...','Destiny was written at your birth'],
+    ],
+    'r-headline': '✦ Your Destiny Revealed ✦',
+    'r-tagline':  'The message is written in the lines of your palm',
+    'm-title':    '🔮 Payment',
+    'm-sub':      'Secure payment via Stripe · Instant result',
+    'm-secure':   '256-bit SSL · Secured by Stripe',
+    'pay-btn-text':'Pay $5 & Reveal Mystery',
+    'm-cancel':   'Cancel',
+    'act-save':   '📜 Save reading',
+    'act-new':    '✦ New reading',
+    'disclaimer': 'Palmistry is an art of self-knowledge. Results are for entertainment purposes.',
+    'perks': [
+      '5 palm lines with in-depth interpretations',
+      'Destiny & life path prediction',
+      'Zodiac compatibility reading',
+      'Finger numerology (life, soul & destiny numbers)',
+      'Palm image annotated with lines & legend',
+      'Personal mystical message',
+    ],
+    'saved': '📜 Saved! (feature coming soon)',
+    'no-img-err': 'No image found — using demo mode',
+    'pay-err':    'Payment error. Please check your card details.',
+    'n-life':   'Life Number',
+    'n-soul':   'Soul Number',
+    'n-dest':   'Destiny Number',
+    'compat-lbl': 'Zodiac Compatibility',
+    'compat-txt': 'Your palm\'s aura resonates with these signs:',
+    'num-lbl':    'Palm Numerology',
+    'fate-lbl':   '✦ Destiny Message',
+  },
+  pl: {
+    'h-title':    'Mistyka Dłoni',
+    'h-tag':      'Starożytna Mądrość · Chiromancja · Przeznaczenie',
+    'lbl-upload': '✦ Zdjęcie dłoni',
+    'drop-title': 'Wgraj zdjęcie dłoni',
+    'drop-hint':  'JPG, PNG, WEBP · dobre oświetlenie, czyste tło',
+    'rm-btn':     '✕ Usuń',
+    'lbl-offer':  '✦ Pełne Odczytanie',
+    'price-desc': 'Jedno pełne odczytanie',
+    'btn-pay':    '🔮 Odkryj Przeznaczenie — $5',
+    'btn-demo':   'Tryb demo (bez płatności)',
+    'load-msgs':  [
+      ['Gwiazdy czytają linie...','Duchy starożytnych chiromantów budzą się'],
+      ['Starożytne runy ożywają...','Każda linia to strona księgi losu'],
+      ['Wszechświat szepcze odpowiedzi...','Planety ustawiają się w twój znak'],
+      ['Tajemnice się odsłaniają...','Przesłanie przekracza tysiąclecia'],
+      ['Mapa życia się pojawia...','Przeznaczenie zostało zapisane przy narodzinach'],
+    ],
+    'r-headline': '✦ Twoje Przeznaczenie Objawione ✦',
+    'r-tagline':  'Przesłanie jest zapisane w liniach twojej dłoni',
+    'm-title':    '🔮 Płatność',
+    'm-sub':      'Bezpieczna płatność przez Stripe · Natychmiastowy wynik',
+    'm-secure':   '256-bit SSL · Zabezpieczone przez Stripe',
+    'pay-btn-text':'Zapłać $5 i Odkryj Tajemnicę',
+    'm-cancel':   'Anuluj',
+    'act-save':   '📜 Zapisz',
+    'act-new':    '✦ Nowe',
+    'disclaimer': 'Chiromancja to sztuka samopoznania. Wyniki mają charakter rozrywkowy.',
+    'perks': [
+      '5 linii dłoni ze szczegółową interpretacją',
+      'Przepowiednia losu i drogi życia',
+      'Zgodność ze znakami Zodiaku',
+      'Numerologia palców (liczby życia, duszy, przeznaczenia)',
+      'Dłoń z naniesionymi liniami i legendą',
+      'Osobiste mistyczne przesłanie',
+    ],
+    'saved': '📜 Zapisano! (funkcja w przygotowaniu)',
+    'no-img-err': 'Brak obrazu — używamy trybu demo',
+    'pay-err':    'Błąd płatności. Sprawdź dane karty.',
+    'n-life':   'Liczba Życia',
+    'n-soul':   'Liczba Duszy',
+    'n-dest':   'Liczba Przeznaczenia',
+    'compat-lbl': 'Zgodność Zodiaku',
+    'compat-txt': 'Aura twojej dłoni rezonuje z tymi znakami:',
+    'num-lbl':    'Numerologia Dłoni',
+    'fate-lbl':   '✦ Przesłanie Przeznaczenia',
+  }
+};
+
+let lang = 'ru';
+function T(key){ return LANGS[lang][key] || key; }
+
+function setLang(l){
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(l.substring(0,2).toUpperCase()==='РУ'?'р':l==='en'?'e':'p')));
+  // simpler toggle:
+  document.querySelectorAll('.lang-btn').forEach((b,i) => {
+    const codes = ['ru','en','pl'];
+    b.classList.toggle('active', codes[i]===l);
+  });
+  applyLang();
+}
+
+function applyLang(){
+  const ids = ['h-title','h-tag','lbl-upload','drop-title','drop-hint','rm-btn','lbl-offer','price-desc','btn-pay','btn-demo','r-headline','r-tagline','m-title','m-sub','m-secure','pay-btn-text','m-cancel','act-save','act-new','disclaimer'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = T(id);
+  });
+  // perks
+  const ul = document.getElementById('perks-list');
+  if(ul) ul.innerHTML = T('perks').map(p=>`<li>${p}</li>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════════════════════════════════
+let fileData = null, fileType = null;
+
+const dropZone = document.getElementById('drop-zone');
+const fileIn   = document.getElementById('file-in');
+
+fileIn.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('image/')) handleFile(f);
+});
+
+function handleFile(f){
+  fileType = f.type;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    fileData = ev.target.result;
+    document.getElementById('prev-img').src = fileData;
+    dropZone.style.display = 'none';
+    document.getElementById('preview-box').style.display = 'block';
+    document.getElementById('offer-card').style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+}
+
+function removeImg(){
+  fileData = null; fileType = null; fileIn.value = '';
+  document.getElementById('preview-box').style.display = 'none';
+  dropZone.style.display = 'block';
+  document.getElementById('offer-card').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STRIPE
+// ══════════════════════════════════════════════════════════════════
+// ⚠  REPLACE with your real Stripe publishable key:
+const STRIPE_PK = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE';
+let stripe = null, cardElement = null, stripeReady = false;
+
+// Lazy-load Stripe JS only when user taps Pay — never blocks page render
+function loadStripeScript(){
+  return new Promise((resolve) => {
+    if(window.Stripe){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://js.stripe.com/v3/';
+    s.onload = resolve;
+    s.onerror = resolve; // fail silently → demo mode
+    document.head.appendChild(s);
+  });
+}
+
+async function mountStripeCard(){
+  if(stripeReady) return;
+  if(STRIPE_PK.includes('YOUR_PUBLISHABLE_KEY')){ stripeReady = true; return; }
+  await loadStripeScript();
+  if(!window.Stripe){ stripeReady = true; return; }
+  try {
+    stripe = Stripe(STRIPE_PK);
+    const elements = stripe.elements({
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#C6994A',
+          colorBackground: 'rgba(0,0,0,0)',
+          colorText: '#EDE3C8',
+          colorDanger: '#E06060',
+          fontFamily: 'Georgia, serif',
+          borderRadius: '7px',
+        }
+      }
+    });
+    cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+    cardElement.on('focus', () => document.getElementById('card-element').classList.add('focused'));
+    cardElement.on('blur',  () => document.getElementById('card-element').classList.remove('focused'));
+    cardElement.on('change', e => {
+      document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+    });
+    stripeReady = true;
+  } catch(e){ stripeReady = true; }
+}
+
+async function openStripe(){
+  // If key not configured — skip directly to reading (demo / development)
+  if(STRIPE_PK.includes('YOUR_PUBLISHABLE_KEY')){
+    startReading();
+    return;
+  }
+  // Show modal first so user sees something immediately
+  document.getElementById('stripe-modal').classList.add('open');
+  // Load Stripe in background
+  await mountStripeCard();
+}
+
+function closeStripe(){
+  document.getElementById('stripe-modal').classList.remove('open');
+}
+
+async function submitPayment(){
+  if(!stripe || STRIPE_PK.includes('YOUR_PUBLISHABLE_KEY')){
+    closeStripe();
+    startReading();
+    return;
+  }
+  const btn = document.getElementById('submit-pay');
+  btn.disabled = true;
+  document.getElementById('pay-btn-text').textContent = '⏳ ...';
+  try {
+    // Production: create PaymentIntent on YOUR backend:
+    // const res = await fetch('/api/create-payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount:500, currency:'usd'})});
+    // const {client_secret} = await res.json();
+    // const result = await stripe.confirmCardPayment(client_secret, {payment_method:{card:cardElement}});
+    // if(result.error) throw result.error;
+
+    // DEMO simulation:
+    await new Promise(r => setTimeout(r, 1600));
+    closeStripe();
+    startReading();
+  } catch(e){
+    document.getElementById('card-errors').textContent = T('pay-err');
+    btn.disabled = false;
+    document.getElementById('pay-btn-text').innerHTML = T('pay-btn-text');
+  }
+}
+
+function runDemo(){ startReading(); }
+
+// ══════════════════════════════════════════════════════════════════
+// LOADING
+// ══════════════════════════════════════════════════════════════════
+let loadTimer = null;
+
+function startReading(){
+  document.getElementById('upload-card').style.display  = 'none';
+  document.getElementById('offer-card').style.display   = 'none';
+  document.getElementById('loading-view').style.display = 'block';
+
+  let i = 0;
+  const msgs = T('load-msgs');
+  function tick(){
+    const [t,s] = msgs[i % msgs.length];
+    document.getElementById('load-title').textContent = t;
+    document.getElementById('load-sub').textContent   = s;
+    i++;
+  }
+  tick();
+  loadTimer = setInterval(tick, 2000);
+
+  doReading().then(data => {
+    clearInterval(loadTimer);
+    document.getElementById('loading-view').style.display = 'none';
+    renderResult(data);
+  }).catch(() => {
+    clearInterval(loadTimer);
+    document.getElementById('loading-view').style.display = 'none';
+    renderResult(getDemoData());
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RANDOMISATION SEEDS — guarantee uniqueness every reading
+// ══════════════════════════════════════════════════════════════════
+const ESOTERIC_SYSTEMS = {
+  ru: [
+    { name: 'Хиромантия', desc: 'классическая индийская хиромантия (Хасто-Самудрика-Шастра)' },
+    { name: 'Каббала', desc: 'каббалистическое учение о Древе Сефирот и десяти Сефирах' },
+    { name: 'Таро', desc: 'Аркан Таро — соотнеси каждую линию с конкретной картой Старших Арканов' },
+    { name: 'Астрология', desc: 'ведическая джйотиш-астрология: бугры планет на ладони' },
+    { name: 'Нумерология Пифагора', desc: 'пифагорейская нумерология и магические квадраты' },
+    { name: 'Рунический оракул', desc: 'германские руны Старшего Футарка — каждой линии соответствует руна' },
+    { name: 'Цыганская хиромантия', desc: 'цыганская традиция чтения ладони (Рома-дром)' },
+    { name: 'Китайская хиромантия', desc: 'китайская хиромантия Сяо Мэн: концепция Инь-Ян и пять элементов У-Синь' },
+    { name: 'Суфийская мистика', desc: 'суфийская традиция: ладонь как зеркало духовного состояния мюрида' },
+    { name: 'Герметизм', desc: 'герметическая традиция: «Как вверху, так и внизу» — ладонь как микрокосм Вселенной' },
+  ],
+  en: [
+    { name: 'Palmistry', desc: 'classical Indian palmistry (Hasta-Samudrika-Shastra)' },
+    { name: 'Kabbalah', desc: 'Kabbalistic teaching of the Tree of Sephirot and ten Sephirot' },
+    { name: 'Tarot', desc: 'Tarot Arcana — link each line to a specific Major Arcana card' },
+    { name: 'Vedic Astrology', desc: 'Jyotish astrology: planetary mounts on the palm' },
+    { name: 'Pythagorean Numerology', desc: 'Pythagorean numerology and magic squares' },
+    { name: 'Runic Oracle', desc: 'Elder Futhark runes — each line corresponds to a rune' },
+    { name: 'Romani Palmistry', desc: 'Romani palm-reading tradition (Roma-drom)' },
+    { name: 'Chinese Palmistry', desc: 'Chinese Xiao Meng palmistry: Yin-Yang and five Wu-Xing elements' },
+    { name: 'Sufi Mysticism', desc: 'Sufi tradition: the palm as a mirror of the mureed\'s spiritual state' },
+    { name: 'Hermeticism', desc: 'Hermetic tradition: "As above, so below" — the palm as microcosm of the Universe' },
+  ],
+  pl: [
+    { name: 'Chiromancja', desc: 'klasyczna indyjska chiromancja (Hasta-Samudrika-Shastra)' },
+    { name: 'Kabała', desc: 'kabalistyczna nauka o Drzewie Sefirot i dziesięciu Sefirot' },
+    { name: 'Tarot', desc: 'Arkana Tarota — połącz każdą linię z konkretną kartą Wielkich Arkanów' },
+    { name: 'Astrologia Wedyjska', desc: 'astrologia Jyotish: pagórki planet na dłoni' },
+    { name: 'Numerologia Pitagorasa', desc: 'numerologia pitagorejska i magiczne kwadraty' },
+    { name: 'Wyrocznia Run', desc: 'runy Starszego Fuþarku — każda linia odpowiada runie' },
+    { name: 'Cygańska Chiromancja', desc: 'tradycja cygańskiego czytania dłoni (Roma-drom)' },
+    { name: 'Chińska Chiromancja', desc: 'chińska chiromancja Xiao Meng: koncepcja Yin-Yang i pięć elementów Wu-Xing' },
+    { name: 'Mistyka Suficka', desc: 'tradycja suficka: dłoń jako lustro duchowego stanu muryda' },
+    { name: 'Hermetyzm', desc: 'tradycja hermetyczna: „Jak na górze, tak na dole" — dłoń jako mikrokosmos Wszechświata' },
+  ],
+};
+
+const TONES = {
+  ru: ['пророчески и торжественно', 'поэтично, образами природы и космоса', 'как древний мудрец из Александрийской библиотеки', 'мистически и тревожно, с нотками тайны', 'тепло и лично, как будто говоришь с давним другом', 'архаичным языком, с отсылками к мифологии', 'загадочно, с иносказаниями и метафорами', 'страстно и образно, язык поэзии'],
+  en: ['prophetically and solemnly', 'poetically, with imagery of nature and cosmos', 'like an ancient sage from the Library of Alexandria', 'mystically and ominously, with hints of mystery', 'warmly and personally, as if speaking to an old friend', 'in archaic language, with mythological references', 'enigmatically, with allegory and metaphor', 'passionately and vividly, in the language of poetry'],
+  pl: ['proroczo i uroczyście', 'poetycko, obrazami natury i kosmosu', 'jak starożytny mędrzec z Biblioteki Aleksandryjskiej', 'mistycznie i niepokojąco, z nutą tajemnicy', 'ciepło i osobiście, jak do starego przyjaciela', 'archaicznym językiem, z odniesieniami do mitologii', 'zagadkowo, z alegorią i metaforą', 'namiętnie i plastycznie, językiem poezji'],
+};
+
+const LIFE_ASPECTS = {
+  ru: [['любовь и отношения','потаённые желания сердца','романтические испытания'],['карьера и призвание','тайное предназначение','профессиональные переломы'],['духовный рост','связь с высшими силами','мистический путь'],['здоровье и жизненная сила','скрытые резервы тела','исцеление'],['богатство и изобилие','поток денег и возможностей','материальное процветание'],['семья и корни','родовые паттерны','связь с предками'],['творчество и самовыражение','художественный дар','муза']],
+  en: [['love and relationships','hidden desires of the heart','romantic trials'],['career and calling','secret destiny','professional turning points'],['spiritual growth','connection with higher forces','mystical path'],['health and vital force','hidden reserves of the body','healing'],['wealth and abundance','flow of money and opportunities','material prosperity'],['family and roots','ancestral patterns','connection with forebears'],['creativity and self-expression','artistic gift','the muse']],
+  pl: [['miłość i relacje','ukryte pragnienia serca','romantyczne próby'],['kariera i powołanie','tajne przeznaczenie','zawodowe przełomy'],['wzrost duchowy','połączenie z wyższymi siłami','mistyczna ścieżka'],['zdrowie i siła życiowa','ukryte zasoby ciała','uzdrowienie'],['bogactwo i obfitość','przepływ pieniędzy i możliwości','materialna pomyślność'],['rodzina i korzenie','wzorce przodków','połączenie z przodkami'],['twórczość i samowyrażenie','artystyczny dar','muza']],
+};
+
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n){ return [...arr].sort(()=>Math.random()-.5).slice(0,n); }
+
+function buildPrompt(l){
+  const systems   = ESOTERIC_SYSTEMS[l] || ESOTERIC_SYSTEMS.ru;
+  const tones     = TONES[l] || TONES.ru;
+  const aspects   = LIFE_ASPECTS[l] || LIFE_ASPECTS.ru;
+
+  // Pick 3 random esoteric systems (always different combo)
+  const chosenSystems = pickN(systems, 3);
+  const chosenTone    = pick(tones);
+  const chosenAspects = pickN(aspects, 3);
+  const sessionSeed   = Math.random().toString(36).slice(2,8).toUpperCase();
+
+  // Random line palette — vary colours slightly each reading
+  const lineColors = {
+    life:  pick(['#E85D24','#D04A15','#F07040','#C84020']),
+    heart: pick(['#C0392B','#A82525','#D94040','#B03030']),
+    head:  pick(['#3B8BD4','#2A7AC0','#4E9CE0','#2060A8']),
+    fate:  pick(['#C6994A','#B8882A','#D4AA60','#A07830']),
+    sun:   pick(['#E8CC80','#D4B860','#F0D890','#C8A840']),
+  };
+
+  const zodiacPool = {
+    ru: ['Овен','Телец','Близнецы','Рак','Лев','Дева','Весы','Скорпион','Стрелец','Козерог','Водолей','Рыбы'],
+    en: ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'],
+    pl: ['Baran','Byk','Bliźnięta','Rak','Lew','Panna','Waga','Skorpion','Strzelec','Koziorożec','Wodnik','Ryby'],
+  };
+  const zodPick = pickN(zodiacPool[l] || zodiacPool.ru, 3);
+
+  const numLife    = pick([1,2,3,4,5,6,7,8,9,11,22,33]);
+  const numSoul    = pick([1,2,3,4,5,6,7,8,9,11,22]);
+  const numDest    = pick([1,2,3,4,5,6,7,8,9,11,22,33]);
+
+  const systemNames  = chosenSystems.map(s=>s.name).join(', ');
+  const systemDescs  = chosenSystems.map((s,i)=>`${i+1}. **${s.name}**: ${s.desc}`).join('\n');
+  const aspectNames  = chosenAspects.map(a=>a.join(' / ')).join(' | ');
+  const keywordHints = [
+    pick(['Трансформация','Awakening','Transformacja','Revolution','Пробуждение','Metamorphose']),
+    pick(['Скрытые силы','Shadow','Głębia','Karma','Потенциал','Magia']),
+    pick(['Прорыв','Crossroads','Przełom','Destiny','Изменение','Révélation']),
+  ];
+
+  const sessionInfo = `[Session: ${sessionSeed} | Systems: ${systemNames} | Tone: ${chosenTone} | Aspects: ${aspectNames}]`;
+
+  if(l === 'ru') return `${sessionInfo}
+
+Ты — хранитель тайных знаний трёх эзотерических традиций: ${systemNames}.
+Твой стиль: ${chosenTone}.
+Сейчас перед тобой ладонь человека. Проведи УНИКАЛЬНОЕ прочтение, опираясь именно на эти три системы.
+
+СИСТЕМЫ ДЛЯ ЭТОГО СЕАНСА:
+${systemDescs}
+
+КЛЮЧЕВЫЕ ТЕМЫ ДЛЯ АКЦЕНТА: ${aspectNames}
+
+ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ К УНИКАЛЬНОСТИ:
+— Каждая линия должна быть интерпретирована через призму конкретной системы из списка выше
+— Упоминай конкретные символы: арканы Таро (если выбрано), конкретные сефиры (если Каббала), конкретные руны (если руны), конкретные планетарные бугры (если астрология/хиромантия) и т.д.
+— НЕ используй шаблонные фразы типа "жизнь будет насыщенной", "ты особенный человек" — пиши КОНКРЕТНО по линиям
+— Ключевые слова должны быть из словаря выбранных систем (не generic)
+— Числа нумерологии: ${numLife} / ${numSoul} / ${numDest} — объясни их значение именно в рамках ${chosenSystems[2]?.name}
+
+Верни ТОЛЬКО валидный JSON (без markdown-обёртки):
+{"fate_message":"Уникальное мистическое послание из трёх систем (3 предложения, тон: ${chosenTone}, упомяни конкретный символ одной из систем)","lines":[{"id":"life","name":"Линия Жизни","color":"${lineColors.life}","reading":"Толкование через ${chosenSystems[0].name} — 3-4 предложения, конкретные символы этой системы. Используй <em>теги</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Линия Сердца","color":"${lineColors.heart}","reading":"Толкование через ${chosenSystems[1].name} — тема: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Линия Разума","color":"${lineColors.head}","reading":"Толкование через ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Линия Судьбы","color":"${lineColors.fate}","reading":"Синтез двух систем из списка — тема: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Линия Солнца","color":"${lineColors.sun}","reading":"Через призму ${chosenSystems[0].name} — тема: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Толкование чисел ${numLife}/${numSoul}/${numDest} через ${chosenSystems[2]?.name} — 2-3 предложения с конкретными символами."}`;
+
+  if(l === 'en') return `${sessionInfo}
+
+You are a keeper of secret knowledge from three esoteric traditions: ${systemNames}.
+Your style: ${chosenTone}.
+Before you is a person's palm. Conduct a UNIQUE reading, drawing specifically on these three systems.
+
+SYSTEMS FOR THIS SESSION:
+${systemDescs}
+
+KEY THEMES TO EMPHASISE: ${aspectNames}
+
+UNIQUENESS REQUIREMENTS:
+— Each line must be interpreted through the lens of a specific system from the list above
+— Name concrete symbols: Tarot arcana (if chosen), specific Sephiroth (if Kabbalah), specific runes (if runes), specific planetary mounts (if astrology/palmistry), etc.
+— Do NOT use template phrases like "life will be rich" or "you are a special person" — write SPECIFICALLY about the lines
+— Keywords must come from the vocabulary of the chosen systems (not generic)
+— Numerology numbers: ${numLife} / ${numSoul} / ${numDest} — explain their meaning within ${chosenSystems[2]?.name}
+
+Return ONLY valid JSON (no markdown wrapper):
+{"fate_message":"Unique mystical message from three systems (3 sentences, tone: ${chosenTone}, mention a specific symbol)","lines":[{"id":"life","name":"Life Line","color":"${lineColors.life}","reading":"Interpretation via ${chosenSystems[0].name} — 3-4 sentences with specific symbols. Use <em>tags</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Heart Line","color":"${lineColors.heart}","reading":"Interpretation via ${chosenSystems[1].name} — theme: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Head Line","color":"${lineColors.head}","reading":"Interpretation via ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Fate Line","color":"${lineColors.fate}","reading":"Synthesis of two systems — theme: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Sun Line","color":"${lineColors.sun}","reading":"Through ${chosenSystems[0].name} — theme: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretation of ${numLife}/${numSoul}/${numDest} via ${chosenSystems[2]?.name} — 2-3 sentences with specific symbols."}`;
+
+  // pl
+  return `${sessionInfo}
+
+Jesteś strażnikiem tajnej wiedzy trzech tradycji ezoterycznych: ${systemNames}.
+Twój styl: ${chosenTone}.
+Przed tobą dłoń człowieka. Przeprowadź UNIKATOWĄ interpretację, opierając się na tych trzech systemach.
+
+SYSTEMY NA TEN SEANS:
+${systemDescs}
+
+KLUCZOWE TEMATY DO PODKREŚLENIA: ${aspectNames}
+
+WYMAGANIA UNIKALNOŚCI:
+— Każda linia musi być zinterpretowana przez pryzmat konkretnego systemu z listy
+— Wymieniaj konkretne symbole: arkany Tarota, konkretne Sefirot, konkretne runy, konkretne pagórki planetarne itp.
+— NIE używaj szablonowych zdań jak "życie będzie bogate" — pisz KONKRETNIE o liniach
+— Słowa kluczowe muszą pochodzić ze słownictwa wybranych systemów
+— Liczby numerologiczne: ${numLife} / ${numSoul} / ${numDest} — wyjaśnij ich znaczenie w ramach ${chosenSystems[2]?.name}
+
+Zwróć TYLKO poprawny JSON (bez markdown):
+{"fate_message":"Unikalne mistyczne przesłanie z trzech systemów (3 zdania, ton: ${chosenTone}, wspomnij konkretny symbol)","lines":[{"id":"life","name":"Linia Życia","color":"${lineColors.life}","reading":"Interpretacja przez ${chosenSystems[0].name} — 3-4 zdania, konkretne symbole. Używaj <em>tagów</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Linia Serca","color":"${lineColors.heart}","reading":"Przez ${chosenSystems[1].name} — temat: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Linia Rozumu","color":"${lineColors.head}","reading":"Przez ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Linia Losu","color":"${lineColors.fate}","reading":"Synteza dwóch systemów — temat: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Linia Słońca","color":"${lineColors.sun}","reading":"Przez ${chosenSystems[0].name} — temat: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretacja ${numLife}/${numSoul}/${numDest} przez ${chosenSystems[2]?.name} — 2-3 zdania z konkretnymi symbolami."}`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CLAUDE API CALL — через /api/reading (API-ключ скрыт на сервере)
+// ══════════════════════════════════════════════════════════════════
+async function doReading(){
+  const prompt = buildPrompt(lang);
+  const body   = { prompt };
+
+  if(fileData){
+    body.image      = fileData.split(',')[1];
+    body.image_type = fileType || 'image/jpeg';
+  }
+
+  const resp = await fetch('/api/reading', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body)
+  });
+
+  if(!resp.ok){
+    const err = await resp.text().catch(()=>'');
+    console.error('API error', resp.status, err);
+    throw new Error('api ' + resp.status);
+  }
+
+  return await resp.json();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DEMO DATA (per language)
+// ══════════════════════════════════════════════════════════════════
+function getDemoData(){
+  if(lang === 'en') return {
+    fate_message: "The universe has etched a rare constellation upon your palm — the path of a visionary and dreamer. The stars speak clearly: you arrived in this world to leave a mark that echoes through generations. Your destiny is not a straight road, but a spiral ascending ever toward the light.",
+    lines:[
+      {id:"life",name:"Life Line",color:"#E85D24",reading:"Your life line is deep and sharply defined — a sign of <em>tremendous vital force</em> and rare spiritual endurance. Its curve speaks of a rich, event-filled life; a <em>pivotal turning point</em> awaits in maturity, after which a wholly new chapter opens. Your energy draws people like a flame draws moths.",keywords:["Longevity","Energy","Change"]},
+      {id:"heart",name:"Heart Line",color:"#C0392B",reading:"The heart line arcs high — mark of <em>profound passion</em> and boundless capacity to love. There was, or will be, a meeting that overturns your entire universe. You feel another's pain as your own — a gift and a trial alike. <em>True love</em> comes when you cease to seek it.",keywords:["Love","Devotion","Intuition"]},
+      {id:"head",name:"Head Line",color:"#3B8BD4",reading:"Long and straight, your head line speaks of an <em>exceptional analytical mind</em> and a rare gift for seeing what is hidden from others. You were born to solve complex riddles — your mind works like a star chart, encompassing detail and whole simultaneously. Beware <em>excessive rationalism</em> — sometimes the heart is wiser.",keywords:["Wisdom","Analysis","Vision"]},
+      {id:"fate",name:"Fate Line",color:"#C6994A",reading:"The fate line rises from the base of the palm toward the heavens — a clear sign of <em>definite purpose</em>. You are no accidental presence in this world. Saturn favours you, and professional effort will yield fruit beyond your current imaginings. <em>Maturity</em> opens doors that youth walked past.",keywords:["Calling","Career","Power"]},
+      {id:"sun",name:"Sun Line",color:"#E8CC80",reading:"Apollo's line — the sun line — is clearly visible, a rare mark of <em>creative gift and future renown</em>. Apollo smiles upon you; your talents will be seen and valued. Seek expression through art, word, or beauty in any form. <em>Recognition</em> comes through authenticity, never through a mask.",keywords:["Creativity","Recognition","Light"]},
+    ],
+    zodiac_compatible:["Scorpio","Pisces","Cancer"],
+    numerology:{life_number:7,soul_number:3,destiny_number:11},
+    numerology_reading:"The number 7 is the sacred number of mystics and sages. Combined with soul number 3, you carry the <em>triune nature of the creator</em>. Destiny number 11 is a master number — the sign of one who has come with a singular mission."
+  };
+  if(lang === 'pl') return {
+    fate_message: "Wszechświat wyryło na twojej dłoni rzadką konstelację — ścieżkę wizjonera i marzyciela. Gwiazdy mówią wyraźnie: przybyłeś na ten świat, by zostawić ślad, który rozbrzmiewa przez pokolenia. Twoje przeznaczenie to nie prosta droga, lecz spirala wznosząca się ku światłu.",
+    lines:[
+      {id:"life",name:"Linia Życia",color:"#E85D24",reading:"Twoja linia życia jest głęboka i wyraźna — znak <em>ogromnej siły witalnej</em> i rzadkiej wytrwałości ducha. Jej zakrzywienie mówi o bogatym, pełnym wydarzeń życiu; <em>przełomowy moment</em> czeka w dojrzałości, po którym otworzy się zupełnie nowy rozdział. Twoja energia przyciąga ludzi jak płomień przyciąga ćmy.",keywords:["Długowieczność","Energia","Zmiana"]},
+      {id:"heart",name:"Linia Serca",color:"#C0392B",reading:"Linia serca wznosi się wysoko — znak <em>głębokiej namiętności</em> i nieograniczonej zdolności do miłości. Było lub będzie spotkanie, które przewróci cały twój wszechświat. Czujesz cudzý ból jak własny — dar i próba zarazem. <em>Prawdziwa miłość</em> przychodzi, gdy przestaniesz jej szukać.",keywords:["Miłość","Oddanie","Intuicja"]},
+      {id:"head",name:"Linia Rozumu",color:"#3B8BD4",reading:"Długa i prosta linia głowy mówi o <em>wyjątkowym umyśle analitycznym</em> i rzadkiej zdolności widzenia tego, co ukryte. Urodziłeś się do rozwiązywania złożonych zagadek. Strzeż się <em>nadmiernego racjonalizmu</em> — czasem serce jest mądrzejsze.",keywords:["Mądrość","Analiza","Wizja"]},
+      {id:"fate",name:"Linia Losu",color:"#C6994A",reading:"Linia losu wznosi się od podstawy dłoni ku górze — wyraźny znak <em>określonego przeznaczenia</em>. Saturn ci sprzyja, a wysiłek zawodowy przyniesie owoce przekraczające obecne wyobrażenia. <em>Dojrzałość</em> otworzy drzwi, które młodość mijała.",keywords:["Powołanie","Kariera","Władza"]},
+      {id:"sun",name:"Linia Słońca",color:"#E8CC80",reading:"Linia Apollina jest wyraźnie widoczna — rzadki znak <em>daru twórczego i przyszłej sławy</em>. Apollo uśmiecha się do ciebie; twoje talenty zostaną dostrzeżone. <em>Uznanie</em> przychodzi przez autentyczność, nie przez maskę.",keywords:["Twórczość","Uznanie","Światło"]},
+    ],
+    zodiac_compatible:["Skorpion","Ryby","Rak"],
+    numerology:{life_number:7,soul_number:3,destiny_number:11},
+    numerology_reading:"Liczba 7 to święta liczba mistyków i mędrców. W połączeniu z liczbą duszy 3 nosisz w sobie <em>trojistą naturę twórcy</em>. Liczba przeznaczenia 11 to liczba mistrzowska — znak człowieka przybyłego ze szczególną misją."
+  };
+  // default ru
+  return {
+    fate_message:"Вселенная начертала на твоей ладони редкий узор — путь исследователя и мечтателя. Звёзды говорят: ты пришёл в этот мир, чтобы оставить след, который помнят поколения. Твоя судьба — это не прямая дорога, а спираль, поднимающаяся к свету.",
+    lines:[
+      {id:"life",name:"Линия Жизни",color:"#E85D24",reading:"Линия жизни на твоей ладони глубока и чётко очерчена — это знак <em>мощной жизненной силы</em> и редкой выносливости духа. Изгиб говорит о том, что ты проживёшь насыщенную, полную событий жизнь, <em>переломный момент</em> ожидается в зрелом возрасте, после которого откроется новая глава. Твоя энергия притягивает людей, как пламя притягивает мотыльков.",keywords:["Долголетие","Энергия","Перемены"]},
+      {id:"heart",name:"Линия Сердца",color:"#C0392B",reading:"Линия сердца изгибается высоко — признак <em>глубокой страстности</em> и способности любить безгранично. В твоей жизни была или будет встреча, которая перевернёт всё мироздание. Ты чувствуешь чужую боль как свою — это дар и одновременно испытание. <em>Истинная любовь</em> придёт, когда ты перестанешь её искать.",keywords:["Любовь","Преданность","Интуиция"]},
+      {id:"head",name:"Линия Разума",color:"#3B8BD4",reading:"Длинная и прямая линия разума говорит о <em>незаурядном аналитическом уме</em> и редкой способности видеть то, что скрыто от других. Ты рождён для решения сложных задач — твой мозг работает как звёздная карта, охватывая одновременно детали и целое. Остерегайся <em>чрезмерного рационализма</em> — порой сердце мудрее разума.",keywords:["Мудрость","Анализ","Видение"]},
+      {id:"fate",name:"Линия Судьбы",color:"#C6994A",reading:"Линия судьбы начинается у основания ладони и устремляется ввысь — это знак <em>чёткого предназначения</em>. Saturn благоволит тебе, и усилия в профессии принесут плоды, о которых ты пока только мечтаешь. <em>Зрелость</em> откроет двери, которые молодость обходила стороной.",keywords:["Призвание","Карьера","Власть"]},
+      {id:"sun",name:"Линия Солнца",color:"#E8CC80",reading:"Линия Аполлона отчётливо видна — это редкий знак <em>творческого дара и будущей известности</em>. Аполлон улыбается тебе — твои таланты будут замечены и оценены. <em>Слава</em> придёт через подлинность, а не через маску.",keywords:["Творчество","Признание","Свет"]},
+    ],
+    zodiac_compatible:["Скорпион","Рыбы","Рак"],
+    numerology:{life_number:7,soul_number:3,destiny_number:11},
+    numerology_reading:"Число 7 — священное число мистиков и мудрецов. В сочетании с числом душ 3, ты несёшь в себе <em>триединство творца</em>. Число судьбы 11 — мастер-число, знак человека, пришедшего с особой миссией."
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER RESULT
+// ══════════════════════════════════════════════════════════════════
+function renderResult(data){
+  // palm image
+  const rp = document.getElementById('r-palm');
+  if(fileData){ rp.src = fileData; rp.style.display = 'block'; }
+  else { rp.style.display = 'none'; document.getElementById('r-canvas').style.display = 'none'; }
+
+  // draw lines after image loads
+  if(fileData){
+    rp.onload = () => drawLines(data.lines, rp);
+    if(rp.complete) drawLines(data.lines, rp);
+  }
+
+  // legend
+  document.getElementById('r-legend').innerHTML = data.lines.map(l => `
+    <div class="lpill">
+      <div class="ldot" style="background:${l.color}"></div>
+      <span>${l.name}</span>
+    </div>
+  `).join('');
+
+  // cards
+  const grid = document.getElementById('r-grid');
+  grid.innerHTML = '';
+
+  data.lines.forEach(l => {
+    const c = document.createElement('div');
+    c.className = 'r-card';
+    c.style.setProperty('--lc', l.color);
+    c.innerHTML = `
+      <div class="r-card-head">
+        <span class="r-badge">${l.name}</span>
+        <span class="r-keys">${l.keywords.join(' · ')}</span>
+      </div>
+      <div class="r-text">${l.reading}</div>`;
+    grid.appendChild(c);
+  });
+
+  // zodiac compat
+  addSpecialCard(grid, 'var(--lc,#C4A0E8)', '#C4A0E8', T('compat-lbl'), `
+    <div class="r-text">${T('compat-txt')}</div>
+    <div class="compat-chips">${data.zodiac_compatible.map(z=>`<span class="chip">✦ ${z}</span>`).join('')}</div>
+  `);
+
+  // numerology
+  const nkeys = [T('n-life'), T('n-soul'), T('n-dest')];
+  const nvals = [data.numerology.life_number, data.numerology.soul_number, data.numerology.destiny_number];
+  addSpecialCard(grid, '#70D0D0', '#70D0D0', T('num-lbl'), `
+    <div class="num-grid">
+      ${nvals.map((v,i)=>`<div class="num-cell"><div class="num-big">${v}</div><div class="num-lbl">${nkeys[i]}</div></div>`).join('')}
+    </div>
+    <div class="num-meaning">${data.numerology_reading}</div>
+  `);
+
+  // fate message
+  addSpecialCard(grid, 'var(--gold)', '#C6994A', T('fate-lbl'), `
+    <div class="fate-box">
+      <div class="fate-stars">✦ ✦ ✦ ✦ ✦</div>
+      <div class="fate-words">${data.fate_message}</div>
+    </div>
+  `);
+
+  document.getElementById('result-view').style.display = 'block';
+  document.getElementById('result-view').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function addSpecialCard(grid, lc, badge, label, body){
+  const c = document.createElement('div');
+  c.className = 'r-card';
+  c.style.setProperty('--lc', lc);
+  c.innerHTML = `
+    <div class="r-card-head">
+      <span class="r-badge" style="color:${badge};border-color:${badge}">${label}</span>
+    </div>${body}`;
+  grid.appendChild(c);
+}
+
+// ── DRAW PALM LINES ──
+function drawLines(lines, img){
+  const cv = document.getElementById('r-canvas');
+  const w  = img.offsetWidth, h = img.offsetHeight;
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+
+  // Approximate relative coords for 5 lines on a typical right palm
+  const shapes = [
+    {pts:[[.36,.24],[.3,.4],[.27,.56],[.28,.72],[.32,.84]], color: lines[0]?.color || '#E85D24'},
+    {pts:[[.22,.27],[.36,.23],[.52,.22],[.68,.23],[.78,.27]], color: lines[1]?.color || '#C0392B'},
+    {pts:[[.26,.37],[.4,.35],[.56,.37],[.7,.41],[.78,.44]],  color: lines[2]?.color || '#3B8BD4'},
+    {pts:[[.5,.84],[.5,.66],[.5,.48],[.5,.32],[.5,.18]],     color: lines[3]?.color || '#C6994A'},
+    {pts:[[.63,.56],[.63,.46],[.63,.36],[.62,.27]],           color: lines[4]?.color || '#E8CC80'},
+  ];
+
+  shapes.forEach(({pts, color}) => {
+    // glow
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = 9;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.globalAlpha = .18; ctx.shadowColor = color; ctx.shadowBlur = 0;
+    ctx.beginPath();
+    pts.forEach(([rx,ry],i)=>{
+      i===0 ? ctx.moveTo(rx*w, ry*h) : ctx.lineTo(rx*w, ry*h);
+    });
+    ctx.stroke();
+    // core line
+    ctx.lineWidth = 2.5; ctx.globalAlpha = .9;
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // midpoint dots
+  shapes.forEach(({pts, color}) => {
+    const [rx,ry] = pts[Math.floor(pts.length/2)];
+    ctx.save();
+    ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(rx*w, ry*h, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ── RESET ──
+function resetAll(){
+  fileData = null; fileType = null; fileIn.value = '';
+  document.getElementById('preview-box').style.display = 'none';
+  dropZone.style.display = 'block';
+  document.getElementById('offer-card').style.display = 'none';
+  document.getElementById('upload-card').style.display = 'block';
+  document.getElementById('result-view').style.display = 'none';
+  document.getElementById('r-grid').innerHTML = '';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── INIT ──
+applyLang();
+</script>
+</body>
+</html>
