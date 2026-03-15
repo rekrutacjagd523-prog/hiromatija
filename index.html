@@ -585,7 +585,7 @@ body { -webkit-overflow-scrolling: touch; }
   <div class="card" id="upload-card">
     <div class="section-label" id="lbl-upload">✦ Изображение ладони</div>
     <div id="drop-zone">
-      <input type="file" id="file-in" accept="image/*">
+      <input type="file" id="file-in" accept="image/*" capture="environment">
       <span class="drop-icon">🤚</span>
       <p class="drop-title" id="drop-title">Загрузи фото ладони</p>
       <p class="drop-hint" id="drop-hint">JPG, PNG, WEBP · хорошее освещение, чистый фон</p>
@@ -602,7 +602,7 @@ body { -webkit-overflow-scrolling: touch; }
     <div class="price-pill">
       <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
       <div>
-        <div class="price-amount">$5.00</div>
+        <div class="price-amount">$1.99</div>
         <div class="price-desc" id="price-desc">Одно полное прочтение</div>
       </div>
       <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
@@ -617,7 +617,7 @@ body { -webkit-overflow-scrolling: touch; }
     </ul>
     <div class="rune-strip">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ</div>
     <button class="btn btn-gold" onclick="openStripe()" id="btn-pay">
-      🔮 Открыть Тайну — $5
+      🔮 Открыть Тайну — $1.99
     </button>
     <button class="btn btn-ghost" onclick="runDemo()" id="btn-demo">
       Демо-режим (без оплаты)
@@ -672,7 +672,7 @@ body { -webkit-overflow-scrolling: touch; }
     <div id="card-errors"></div>
     <div class="secure-row">🔒 <span id="m-secure">256-bit SSL · Защищено Stripe</span></div>
     <button class="btn btn-gold" id="submit-pay" onclick="submitPayment()">
-      <span id="pay-btn-text">Оплатить $5 и Открыть Тайну</span>
+      <span id="pay-btn-text">Оплатить $1.99 и Открыть Тайну</span>
     </button>
     <button class="btn-cancel" onclick="closeStripe()" id="m-cancel">Отмена</button>
   </div>
@@ -726,7 +726,7 @@ const LANGS = {
     'rm-btn':     '✕ Удалить',
     'lbl-offer':  '✦ Полное Прочтение',
     'price-desc': 'Одно полное прочтение',
-    'btn-pay':    '🔮 Открыть Тайну — $5',
+    'btn-pay':    '🔮 Открыть Тайну — $1.99',
     'btn-demo':   'Демо-режим (без оплаты)',
     'load-msgs':  [
       ['Звёзды читают линии...','Духи древних хиромантов пробуждаются'],
@@ -740,7 +740,7 @@ const LANGS = {
     'm-title':    '🔮 Оплата Прочтения',
     'm-sub':      'Безопасная оплата через Stripe · Мгновенный результат',
     'm-secure':   '256-bit SSL · Защищено Stripe',
-    'pay-btn-text':'Оплатить $5 и Открыть Тайну',
+    'pay-btn-text':'Оплатить $1.99 и Открыть Тайну',
     'm-cancel':   'Отмена',
     'act-save':   '📜 Сохранить',
     'act-new':    '✦ Новое',
@@ -773,7 +773,7 @@ const LANGS = {
     'rm-btn':     '✕ Remove',
     'lbl-offer':  '✦ Full Reading',
     'price-desc': 'One complete reading',
-    'btn-pay':    '🔮 Reveal Destiny — $5',
+    'btn-pay':    '🔮 Reveal Destiny — $1.99',
     'btn-demo':   'Demo mode (no payment)',
     'load-msgs':  [
       ['Stars are reading your lines...','Ancient palmists awaken across centuries'],
@@ -787,7 +787,7 @@ const LANGS = {
     'm-title':    '🔮 Payment',
     'm-sub':      'Secure payment via Stripe · Instant result',
     'm-secure':   '256-bit SSL · Secured by Stripe',
-    'pay-btn-text':'Pay $5 & Reveal Mystery',
+    'pay-btn-text':'Pay $1.99 & Reveal Mystery',
     'm-cancel':   'Cancel',
     'act-save':   '📜 Save reading',
     'act-new':    '✦ New reading',
@@ -820,7 +820,7 @@ const LANGS = {
     'rm-btn':     '✕ Usuń',
     'lbl-offer':  '✦ Pełne Odczytanie',
     'price-desc': 'Jedno pełne odczytanie',
-    'btn-pay':    '🔮 Odkryj Przeznaczenie — $5',
+    'btn-pay':    '🔮 Odkryj Przeznaczenie — $1.99',
     'btn-demo':   'Tryb demo (bez płatności)',
     'load-msgs':  [
       ['Gwiazdy czytają linie...','Duchy starożytnych chiromantów budzą się'],
@@ -834,7 +834,7 @@ const LANGS = {
     'm-title':    '🔮 Płatność',
     'm-sub':      'Bezpieczna płatność przez Stripe · Natychmiastowy wynik',
     'm-secure':   '256-bit SSL · Zabezpieczone przez Stripe',
-    'pay-btn-text':'Zapłać $5 i Odkryj Tajemnicę',
+    'pay-btn-text':'Zapłać $1.99 i Odkryj Tajemnicę',
     'm-cancel':   'Anuluj',
     'act-save':   '📜 Zapisz',
     'act-new':    '✦ Nowe',
