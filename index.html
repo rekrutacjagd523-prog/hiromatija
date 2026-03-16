@@ -1148,69 +1148,30 @@ function buildPrompt(l){
 
   const sessionInfo = `[Session: ${sessionSeed} | Systems: ${systemNames} | Tone: ${chosenTone} | Aspects: ${aspectNames}]`;
 
-  if(l === 'ru') return `${sessionInfo}
+  if(l === 'ru') return `[${sessionSeed}|${systemNames}|${chosenTone}]
+Ты мистик-хиромант. Системы сегодня: ${systemNames}. Стиль: ${chosenTone}.
+Смотри на ладонь и дай прочтение. Упоминай конкретные символы систем (арканы/сефиры/руны/бугры).
+ВАЖНО: только обычный текст, без звёздочек, без HTML, без переносов строк.
+Каждый reading — строго 1-2 предложения. Числа: ${numLife}/${numSoul}/${numDest}.
+Продолжи JSON (уже начат с opening brace + fate_message key + opening quote):
+...послание 2 предл...","lines":[{"id":"life","name":"Линия Жизни","color":"${lineColors.life}","reading":"1-2 предл ${chosenSystems[0].name}","keywords":["слово","слово","слово"]},{"id":"heart","name":"Линия Сердца","color":"${lineColors.heart}","reading":"1-2 предл ${chosenSystems[1].name}","keywords":["слово","слово","слово"]},{"id":"head","name":"Линия Разума","color":"${lineColors.head}","reading":"1-2 предл ${chosenSystems[2].name}","keywords":["слово","слово","слово"]},{"id":"fate","name":"Линия Судьбы","color":"${lineColors.fate}","reading":"1-2 предл синтез","keywords":["слово","слово","слово"]},{"id":"sun","name":"Линия Солнца","color":"${lineColors.sun}","reading":"1-2 предл ${chosenSystems[0].name}","keywords":["слово","слово","слово"]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"1-2 предл о числах"}`;
 
-Ты — хранитель тайных знаний трёх эзотерических традиций: ${systemNames}.
-Твой стиль: ${chosenTone}.
-Сейчас перед тобой ладонь человека. Проведи УНИКАЛЬНОЕ прочтение, опираясь именно на эти три системы.
-
-СИСТЕМЫ ДЛЯ ЭТОГО СЕАНСА:
-${systemDescs}
-
-КЛЮЧЕВЫЕ ТЕМЫ ДЛЯ АКЦЕНТА: ${aspectNames}
-
-ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ К УНИКАЛЬНОСТИ:
-— Каждая линия должна быть интерпретирована через призму конкретной системы из списка выше
-— Упоминай конкретные символы: арканы Таро (если выбрано), конкретные сефиры (если Каббала), конкретные руны (если руны), конкретные планетарные бугры (если астрология/хиромантия) и т.д.
-— НЕ используй шаблонные фразы типа "жизнь будет насыщенной", "ты особенный человек" — пиши КОНКРЕТНО по линиям
-— Ключевые слова должны быть из словаря выбранных систем (не generic)
-— Числа нумерологии: ${numLife} / ${numSoul} / ${numDest} — объясни их значение именно в рамках ${chosenSystems[2]?.name}
-
-Верни ТОЛЬКО валидный JSON (без markdown-обёртки):
-{"fate_message":"Уникальное мистическое послание из трёх систем (3 предложения, тон: ${chosenTone}, упомяни конкретный символ одной из систем)","lines":[{"id":"life","name":"Линия Жизни","color":"${lineColors.life}","reading":"Толкование через ${chosenSystems[0].name} — 3-4 предложения, конкретные символы этой системы. Пиши обычный текст без какого-либо форматирования, без звёздочек, без тегов, без спецсимволов.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Линия Сердца","color":"${lineColors.heart}","reading":"Толкование через ${chosenSystems[1].name} — тема: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Линия Разума","color":"${lineColors.head}","reading":"Толкование через ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Линия Судьбы","color":"${lineColors.fate}","reading":"Синтез двух систем из списка — тема: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Линия Солнца","color":"${lineColors.sun}","reading":"Через призму ${chosenSystems[0].name} — тема: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Толкование чисел ${numLife}/${numSoul}/${numDest} через ${chosenSystems[2]?.name} — 2-3 предложения с конкретными символами."}`;
-
-  if(l === 'en') return `${sessionInfo}
-
-You are a keeper of secret knowledge from three esoteric traditions: ${systemNames}.
-Your style: ${chosenTone}.
-Before you is a person's palm. Conduct a UNIQUE reading, drawing specifically on these three systems.
-
-SYSTEMS FOR THIS SESSION:
-${systemDescs}
-
-KEY THEMES TO EMPHASISE: ${aspectNames}
-
-UNIQUENESS REQUIREMENTS:
-— Each line must be interpreted through the lens of a specific system from the list above
-— Name concrete symbols: Tarot arcana (if chosen), specific Sephiroth (if Kabbalah), specific runes (if runes), specific planetary mounts (if astrology/palmistry), etc.
-— Do NOT use template phrases like "life will be rich" or "you are a special person" — write SPECIFICALLY about the lines
-— Keywords must come from the vocabulary of the chosen systems (not generic)
-— Numerology numbers: ${numLife} / ${numSoul} / ${numDest} — explain their meaning within ${chosenSystems[2]?.name}
-
-Return ONLY valid JSON (no markdown wrapper):
-{"fate_message":"Unique mystical message from three systems (3 sentences, tone: ${chosenTone}, mention a specific symbol)","lines":[{"id":"life","name":"Life Line","color":"${lineColors.life}","reading":"Interpretation via ${chosenSystems[0].name} — 3-4 sentences with specific symbols. Write plain text only, no asterisks, no tags, no special formatting characters.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Heart Line","color":"${lineColors.heart}","reading":"Interpretation via ${chosenSystems[1].name} — theme: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Head Line","color":"${lineColors.head}","reading":"Interpretation via ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Fate Line","color":"${lineColors.fate}","reading":"Synthesis of two systems — theme: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Sun Line","color":"${lineColors.sun}","reading":"Through ${chosenSystems[0].name} — theme: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretation of ${numLife}/${numSoul}/${numDest} via ${chosenSystems[2]?.name} — 2-3 sentences with specific symbols."}`;
+  if(l === 'en') return `[${sessionSeed}|${systemNames}|${chosenTone}]
+You are a mystic palmist. Systems: ${systemNames}. Style: ${chosenTone}.
+Read the palm, cite specific symbols (arcana/sephiroth/runes/mounts).
+IMPORTANT: plain text only, no asterisks, no HTML, no line breaks.
+Each reading strictly 1-2 sentences. Numbers: ${numLife}/${numSoul}/${numDest}.
+Continue JSON (already started with opening brace + fate_message key + opening quote):
+...message 2 sent...","lines":[{"id":"life","name":"Life Line","color":"${lineColors.life}","reading":"1-2 sent ${chosenSystems[0].name}","keywords":["word","word","word"]},{"id":"heart","name":"Heart Line","color":"${lineColors.heart}","reading":"1-2 sent ${chosenSystems[1].name}","keywords":["word","word","word"]},{"id":"head","name":"Head Line","color":"${lineColors.head}","reading":"1-2 sent ${chosenSystems[2].name}","keywords":["word","word","word"]},{"id":"fate","name":"Fate Line","color":"${lineColors.fate}","reading":"1-2 sent synthesis","keywords":["word","word","word"]},{"id":"sun","name":"Sun Line","color":"${lineColors.sun}","reading":"1-2 sent ${chosenSystems[0].name}","keywords":["word","word","word"]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"1-2 sent about numbers"}`;
 
   // pl
-  return `${sessionInfo}
-
-Jesteś strażnikiem tajnej wiedzy trzech tradycji ezoterycznych: ${systemNames}.
-Twój styl: ${chosenTone}.
-Przed tobą dłoń człowieka. Przeprowadź UNIKATOWĄ interpretację, opierając się na tych trzech systemach.
-
-SYSTEMY NA TEN SEANS:
-${systemDescs}
-
-KLUCZOWE TEMATY DO PODKREŚLENIA: ${aspectNames}
-
-WYMAGANIA UNIKALNOŚCI:
-— Każda linia musi być zinterpretowana przez pryzmat konkretnego systemu z listy
-— Wymieniaj konkretne symbole: arkany Tarota, konkretne Sefirot, konkretne runy, konkretne pagórki planetarne itp.
-— NIE używaj szablonowych zdań jak "życie będzie bogate" — pisz KONKRETNIE o liniach
-— Słowa kluczowe muszą pochodzić ze słownictwa wybranych systemów
-— Liczby numerologiczne: ${numLife} / ${numSoul} / ${numDest} — wyjaśnij ich znaczenie w ramach ${chosenSystems[2]?.name}
-
-Zwróć TYLKO poprawny JSON (bez markdown):
-{"fate_message":"Unikalne mistyczne przesłanie z trzech systemów (3 zdania, ton: ${chosenTone}, wspomnij konkretny symbol)","lines":[{"id":"life","name":"Linia Życia","color":"${lineColors.life}","reading":"Interpretacja przez ${chosenSystems[0].name} — 3-4 zdania, konkretne symbole. Pisz zwykły tekst bez gwiazdek, tagów ani specjalnych znaków formatowania.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Linia Serca","color":"${lineColors.heart}","reading":"Przez ${chosenSystems[1].name} — temat: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Linia Rozumu","color":"${lineColors.head}","reading":"Przez ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Linia Losu","color":"${lineColors.fate}","reading":"Synteza dwóch systemów — temat: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Linia Słońca","color":"${lineColors.sun}","reading":"Przez ${chosenSystems[0].name} — temat: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretacja ${numLife}/${numSoul}/${numDest} przez ${chosenSystems[2]?.name} — 2-3 zdania z konkretnymi symbolami."}`;
+  return `[${sessionSeed}|${systemNames}|${chosenTone}]
+Jesteś mistykiem-chiromantą. Systemy: ${systemNames}. Styl: ${chosenTone}.
+Odczytaj dłoń, podawaj konkretne symbole (arkany/Sefirot/runy/pagórki).
+WAŻNE: tylko zwykły tekst, bez gwiazdek, bez HTML, bez przełamań linii.
+Każdy reading ściśle 1-2 zdania. Liczby: ${numLife}/${numSoul}/${numDest}.
+Kontynuuj JSON (już zaczęty z nawiasem + kluczem fate_message + cudzysłowem):
+...przesłanie 2 zd...","lines":[{"id":"life","name":"Linia Życia","color":"${lineColors.life}","reading":"1-2 zd ${chosenSystems[0].name}","keywords":["słowo","słowo","słowo"]},{"id":"heart","name":"Linia Serca","color":"${lineColors.heart}","reading":"1-2 zd ${chosenSystems[1].name}","keywords":["słowo","słowo","słowo"]},{"id":"head","name":"Linia Rozumu","color":"${lineColors.head}","reading":"1-2 zd ${chosenSystems[2].name}","keywords":["słowo","słowo","słowo"]},{"id":"fate","name":"Linia Losu","color":"${lineColors.fate}","reading":"1-2 zd synteza","keywords":["słowo","słowo","słowo"]},{"id":"sun","name":"Linia Słońca","color":"${lineColors.sun}","reading":"1-2 zd ${chosenSystems[0].name}","keywords":["słowo","słowo","słowo"]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"1-2 zd o liczbach"}`;
 }
 
 // ══════════════════════════════════════════════════════════════════
