@@ -1167,7 +1167,7 @@ ${systemDescs}
 — Числа нумерологии: ${numLife} / ${numSoul} / ${numDest} — объясни их значение именно в рамках ${chosenSystems[2]?.name}
 
 Верни ТОЛЬКО валидный JSON (без markdown-обёртки):
-{"fate_message":"Уникальное мистическое послание из трёх систем (3 предложения, тон: ${chosenTone}, упомяни конкретный символ одной из систем)","lines":[{"id":"life","name":"Линия Жизни","color":"${lineColors.life}","reading":"Толкование через ${chosenSystems[0].name} — 3-4 предложения, конкретные символы этой системы. Используй <em>теги</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Линия Сердца","color":"${lineColors.heart}","reading":"Толкование через ${chosenSystems[1].name} — тема: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Линия Разума","color":"${lineColors.head}","reading":"Толкование через ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Линия Судьбы","color":"${lineColors.fate}","reading":"Синтез двух систем из списка — тема: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Линия Солнца","color":"${lineColors.sun}","reading":"Через призму ${chosenSystems[0].name} — тема: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Толкование чисел ${numLife}/${numSoul}/${numDest} через ${chosenSystems[2]?.name} — 2-3 предложения с конкретными символами."}`;
+{"fate_message":"Уникальное мистическое послание из трёх систем (3 предложения, тон: ${chosenTone}, упомяни конкретный символ одной из систем)","lines":[{"id":"life","name":"Линия Жизни","color":"${lineColors.life}","reading":"Толкование через ${chosenSystems[0].name} — 3-4 предложения, конкретные символы этой системы. Выделяй ключевые слова звёздочками: **слово**.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Линия Сердца","color":"${lineColors.heart}","reading":"Толкование через ${chosenSystems[1].name} — тема: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Линия Разума","color":"${lineColors.head}","reading":"Толкование через ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Линия Судьбы","color":"${lineColors.fate}","reading":"Синтез двух систем из списка — тема: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Линия Солнца","color":"${lineColors.sun}","reading":"Через призму ${chosenSystems[0].name} — тема: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Толкование чисел ${numLife}/${numSoul}/${numDest} через ${chosenSystems[2]?.name} — 2-3 предложения с конкретными символами."}`;
 
   if(l === 'en') return `${sessionInfo}
 
@@ -1188,7 +1188,7 @@ UNIQUENESS REQUIREMENTS:
 — Numerology numbers: ${numLife} / ${numSoul} / ${numDest} — explain their meaning within ${chosenSystems[2]?.name}
 
 Return ONLY valid JSON (no markdown wrapper):
-{"fate_message":"Unique mystical message from three systems (3 sentences, tone: ${chosenTone}, mention a specific symbol)","lines":[{"id":"life","name":"Life Line","color":"${lineColors.life}","reading":"Interpretation via ${chosenSystems[0].name} — 3-4 sentences with specific symbols. Use <em>tags</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Heart Line","color":"${lineColors.heart}","reading":"Interpretation via ${chosenSystems[1].name} — theme: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Head Line","color":"${lineColors.head}","reading":"Interpretation via ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Fate Line","color":"${lineColors.fate}","reading":"Synthesis of two systems — theme: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Sun Line","color":"${lineColors.sun}","reading":"Through ${chosenSystems[0].name} — theme: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretation of ${numLife}/${numSoul}/${numDest} via ${chosenSystems[2]?.name} — 2-3 sentences with specific symbols."}`;
+{"fate_message":"Unique mystical message from three systems (3 sentences, tone: ${chosenTone}, mention a specific symbol)","lines":[{"id":"life","name":"Life Line","color":"${lineColors.life}","reading":"Interpretation via ${chosenSystems[0].name} — 3-4 sentences with specific symbols. Wrap key words in double asterisks: **word**.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Heart Line","color":"${lineColors.heart}","reading":"Interpretation via ${chosenSystems[1].name} — theme: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Head Line","color":"${lineColors.head}","reading":"Interpretation via ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Fate Line","color":"${lineColors.fate}","reading":"Synthesis of two systems — theme: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Sun Line","color":"${lineColors.sun}","reading":"Through ${chosenSystems[0].name} — theme: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretation of ${numLife}/${numSoul}/${numDest} via ${chosenSystems[2]?.name} — 2-3 sentences with specific symbols."}`;
 
   // pl
   return `${sessionInfo}
@@ -1210,7 +1210,7 @@ WYMAGANIA UNIKALNOŚCI:
 — Liczby numerologiczne: ${numLife} / ${numSoul} / ${numDest} — wyjaśnij ich znaczenie w ramach ${chosenSystems[2]?.name}
 
 Zwróć TYLKO poprawny JSON (bez markdown):
-{"fate_message":"Unikalne mistyczne przesłanie z trzech systemów (3 zdania, ton: ${chosenTone}, wspomnij konkretny symbol)","lines":[{"id":"life","name":"Linia Życia","color":"${lineColors.life}","reading":"Interpretacja przez ${chosenSystems[0].name} — 3-4 zdania, konkretne symbole. Używaj <em>tagów</em>.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Linia Serca","color":"${lineColors.heart}","reading":"Przez ${chosenSystems[1].name} — temat: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Linia Rozumu","color":"${lineColors.head}","reading":"Przez ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Linia Losu","color":"${lineColors.fate}","reading":"Synteza dwóch systemów — temat: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Linia Słońca","color":"${lineColors.sun}","reading":"Przez ${chosenSystems[0].name} — temat: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretacja ${numLife}/${numSoul}/${numDest} przez ${chosenSystems[2]?.name} — 2-3 zdania z konkretnymi symbolami."}`;
+{"fate_message":"Unikalne mistyczne przesłanie z trzech systemów (3 zdania, ton: ${chosenTone}, wspomnij konkretny symbol)","lines":[{"id":"life","name":"Linia Życia","color":"${lineColors.life}","reading":"Interpretacja przez ${chosenSystems[0].name} — 3-4 zdania, konkretne symbole. Otaczaj kluczowe słowa gwiazdkami: **słowo**.","keywords":["${keywordHints[0]}","...","..."]},{"id":"heart","name":"Linia Serca","color":"${lineColors.heart}","reading":"Przez ${chosenSystems[1].name} — temat: ${chosenAspects[0].join('/')}.","keywords":["...","...","..."]},{"id":"head","name":"Linia Rozumu","color":"${lineColors.head}","reading":"Przez ${chosenSystems[2].name}.","keywords":["...","...","..."]},{"id":"fate","name":"Linia Losu","color":"${lineColors.fate}","reading":"Synteza dwóch systemów — temat: ${chosenAspects[1].join('/')}.","keywords":["...","...","..."]},{"id":"sun","name":"Linia Słońca","color":"${lineColors.sun}","reading":"Przez ${chosenSystems[0].name} — temat: ${chosenAspects[2].join('/')}.","keywords":["...","...","..."]}],"zodiac_compatible":${JSON.stringify(zodPick)},"numerology":{"life_number":${numLife},"soul_number":${numSoul},"destiny_number":${numDest}},"numerology_reading":"Interpretacja ${numLife}/${numSoul}/${numDest} przez ${chosenSystems[2]?.name} — 2-3 zdania z konkretnymi symbolami."}`;
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1322,7 +1322,7 @@ function renderResult(data){
         <span class="r-badge">${l.name}</span>
         <span class="r-keys">${l.keywords.join(' · ')}</span>
       </div>
-      <div class="r-text">${l.reading}</div>`;
+      <div class="r-text">${(l.reading||'').replace(/\*\*(.+?)\*\*/g, '<em>$1</em>')}</div>`;
     grid.appendChild(c);
   });
 
@@ -1339,14 +1339,14 @@ function renderResult(data){
     <div class="num-grid">
       ${nvals.map((v,i)=>`<div class="num-cell"><div class="num-big">${v}</div><div class="num-lbl">${nkeys[i]}</div></div>`).join('')}
     </div>
-    <div class="num-meaning">${data.numerology_reading}</div>
+    <div class="num-meaning">${(data.numerology_reading||"").replace(/\*\*(.+?)\*\*/g, "<em>$1</em>")}</div>
   `);
 
   // fate message
   addSpecialCard(grid, 'var(--gold)', '#C6994A', T('fate-lbl'), `
     <div class="fate-box">
       <div class="fate-stars">✦ ✦ ✦ ✦ ✦</div>
-      <div class="fate-words">${data.fate_message}</div>
+      <div class="fate-words">${(data.fate_message||"").replace(/\*\*(.+?)\*\*/g, "<em>$1</em>")}</div>
     </div>
   `);
 
