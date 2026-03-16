@@ -20,11 +20,9 @@ export async function onRequest(context) {
   if (image) content.push({ type: 'image', source: { type: 'base64', media_type: image_type || 'image/jpeg', data: image } });
   content.push({ type: 'text', text: prompt });
 
-  // Ask Claude to respond with JSON only, no markdown, no extra text
-  // Add a prefill to force JSON start
   const messages = [
     { role: 'user', content },
-    { role: 'assistant', content: '{' }  // prefill forces Claude to start JSON immediately
+    { role: 'assistant', content: '{"fate_message":"' }
   ];
 
   let claudeResp;
@@ -45,24 +43,57 @@ export async function onRequest(context) {
 
   const claudeJson = await claudeResp.json();
   const rawText = claudeJson.content.map(b => b.text || '').join('');
-  
-  // Since we prefilled '{', the full JSON is '{' + rawText
-  const fullJson = '{' + rawText;
+
+  // Reconstruct full JSON with our prefill
+  const fullJson = '{"fate_message":"' + rawText;
+
+  // Clean up: replace literal newlines inside JSON string values with spaces
+  // We need to be careful - only replace newlines that are INSIDE string values
+  // Strategy: parse char by char tracking if we're inside a string
+  function cleanJson(str) {
+    let result = '';
+    let inString = false;
+    let escape = false;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      if (escape) {
+        result += ch;
+        escape = false;
+        continue;
+      }
+      if (ch === '\\') {
+        escape = true;
+        result += ch;
+        continue;
+      }
+      if (ch === '"') {
+        inString = !inString;
+        result += ch;
+        continue;
+      }
+      if (inString && (ch === '\n' || ch === '\r')) {
+        result += ' ';
+        continue;
+      }
+      result += ch;
+    }
+    return result;
+  }
+
+  const cleaned = cleanJson(fullJson);
 
   let parsed;
   try {
-    parsed = JSON.parse(fullJson);
+    parsed = JSON.parse(cleaned);
   } catch (e) {
-    // Fallback: find { ... } boundaries
-    const start = fullJson.indexOf('{');
-    const end   = fullJson.lastIndexOf('}');
-    if (start === -1 || end === -1) {
-      return new Response(JSON.stringify({ error: 'no_json', raw: fullJson.slice(0, 400) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
-    }
-    try {
-      parsed = JSON.parse(fullJson.slice(start, end + 1));
-    } catch {
-      return new Response(JSON.stringify({ error: 'parse_failed', raw: fullJson.slice(0, 400) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
+    // Last resort: find boundaries and try again
+    const start = cleaned.indexOf('{');
+    const end   = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      try { parsed = JSON.parse(cleaned.slice(start, end + 1)); }
+      catch { return new Response(JSON.stringify({ error: 'parse_failed', raw: cleaned.slice(0, 500) }), { status: 422, headers: { 'Content-Type': 'application/json' } }); }
+    } else {
+      return new Response(JSON.stringify({ error: 'parse_failed', raw: cleaned.slice(0, 500) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
     }
   }
 
