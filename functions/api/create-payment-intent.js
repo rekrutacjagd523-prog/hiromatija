@@ -23,7 +23,7 @@ export async function onRequest(context) {
 
   // Create PaymentIntent via Stripe API
   const params = new URLSearchParams({
-    amount: '199',          // $1.99 in cents
+    amount: '299',          // $2.99 in cents
     currency: 'usd',
     'automatic_payment_methods[enabled]': 'true',
     description: 'Palm reading — Hiromatija',
