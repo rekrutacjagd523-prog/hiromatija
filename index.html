@@ -969,7 +969,7 @@ function removeImg(){
 // STRIPE
 // ══════════════════════════════════════════════════════════════════
 // ⚠  REPLACE with your real Stripe publishable key:
-const STRIPE_PK = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE';
+const STRIPE_PK = 'pk_live_51T9jzU2NLOrkaPrAoL2jRZOZPCOesHzkBsuq9kgubZArtE5sqesg13xEYsVMAdUtIJShMDecJ3EIlCaBxClluUsK00Atd9O0rl';
 let stripe = null, cardElement = null, stripeReady = false;
 
 // Lazy-load Stripe JS only when user taps Pay — never blocks page render
@@ -1032,33 +1032,39 @@ function closeStripe(){
 }
 
 async function submitPayment(){
-  if(!stripe || STRIPE_PK.includes('YOUR_PUBLISHABLE_KEY')){
-    closeStripe();
-    startReading();
+  if(!stripe){
+    document.getElementById('card-errors').textContent = T('pay-err');
     return;
   }
   const btn = document.getElementById('submit-pay');
   btn.disabled = true;
   document.getElementById('pay-btn-text').textContent = '⏳ ...';
   try {
-    // Production: create PaymentIntent on YOUR backend:
-    // const res = await fetch('/api/create-payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount:500, currency:'usd'})});
-    // const {client_secret} = await res.json();
-    // const result = await stripe.confirmCardPayment(client_secret, {payment_method:{card:cardElement}});
-    // if(result.error) throw result.error;
+    // 1. Create PaymentIntent on server
+    const intentRes = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if(!intentRes.ok) throw new Error('payment_intent_failed');
+    const { client_secret } = await intentRes.json();
 
-    // DEMO simulation:
-    await new Promise(r => setTimeout(r, 1600));
+    // 2. Confirm card payment via Stripe.js
+    const result = await stripe.confirmCardPayment(client_secret, {
+      payment_method: { card: cardElement }
+    });
+    if(result.error) throw result.error;
+
+    // 3. Payment success — start reading
     closeStripe();
     startReading();
   } catch(e){
-    document.getElementById('card-errors').textContent = T('pay-err');
+    document.getElementById('card-errors').textContent = e.message || T('pay-err');
     btn.disabled = false;
     document.getElementById('pay-btn-text').innerHTML = T('pay-btn-text');
   }
 }
 
-function runDemo(){ startReading(); }
 
 // ══════════════════════════════════════════════════════════════════
 // LOADING
