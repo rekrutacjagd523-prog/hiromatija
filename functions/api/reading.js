@@ -20,6 +20,7 @@ export async function onRequest(context) {
   if (image) content.push({ type: 'image', source: { type: 'base64', media_type: image_type || 'image/jpeg', data: image } });
   content.push({ type: 'text', text: prompt });
 
+  // Prefill forces Claude to start JSON immediately
   const messages = [
     { role: 'user', content },
     { role: 'assistant', content: '{"fate_message":"' }
@@ -44,56 +45,48 @@ export async function onRequest(context) {
   const claudeJson = await claudeResp.json();
   const rawText = claudeJson.content.map(b => b.text || '').join('');
 
-  // Reconstruct full JSON with our prefill
+  // Full JSON = prefill + response
   const fullJson = '{"fate_message":"' + rawText;
 
-  // Clean up: replace literal newlines inside JSON string values with spaces
-  // We need to be careful - only replace newlines that are INSIDE string values
-  // Strategy: parse char by char tracking if we're inside a string
-  function cleanJson(str) {
-    let result = '';
-    let inString = false;
-    let escape = false;
+  // Sanitize: clean problematic chars inside JSON string values
+  // Walk char by char: inside strings, escape problematic sequences
+  function sanitizeJson(str) {
+    let out = '';
+    let inStr = false;
+    let esc = false;
     for (let i = 0; i < str.length; i++) {
-      const ch = str[i];
-      if (escape) {
-        result += ch;
-        escape = false;
-        continue;
+      const c = str[i];
+      if (esc) { out += c; esc = false; continue; }
+      if (c === '\\') { esc = true; out += c; continue; }
+      if (c === '"') { inStr = !inStr; out += c; continue; }
+      if (inStr) {
+        if (c === '\n' || c === '\r') { out += ' '; continue; }
+        if (c === '\t') { out += ' '; continue; }
+        // Escape unescaped control characters
+        const code = c.charCodeAt(0);
+        if (code < 0x20) { out += ' '; continue; }
       }
-      if (ch === '\\') {
-        escape = true;
-        result += ch;
-        continue;
-      }
-      if (ch === '"') {
-        inString = !inString;
-        result += ch;
-        continue;
-      }
-      if (inString && (ch === '\n' || ch === '\r')) {
-        result += ' ';
-        continue;
-      }
-      result += ch;
+      out += c;
     }
-    return result;
+    return out;
   }
 
-  const cleaned = cleanJson(fullJson);
+  const sanitized = sanitizeJson(fullJson);
 
   let parsed;
   try {
-    parsed = JSON.parse(cleaned);
+    parsed = JSON.parse(sanitized);
   } catch (e) {
-    // Last resort: find boundaries and try again
-    const start = cleaned.indexOf('{');
-    const end   = cleaned.lastIndexOf('}');
-    if (start !== -1 && end !== -1) {
-      try { parsed = JSON.parse(cleaned.slice(start, end + 1)); }
-      catch { return new Response(JSON.stringify({ error: 'parse_failed', raw: cleaned.slice(0, 500) }), { status: 422, headers: { 'Content-Type': 'application/json' } }); }
+    // Try to find last valid } and truncate
+    const lastBrace = sanitized.lastIndexOf('}');
+    if (lastBrace > 0) {
+      try {
+        parsed = JSON.parse(sanitized.slice(0, lastBrace + 1));
+      } catch {
+        return new Response(JSON.stringify({ error: 'parse_failed', raw: sanitized.slice(0, 600) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
+      }
     } else {
-      return new Response(JSON.stringify({ error: 'parse_failed', raw: cleaned.slice(0, 500) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'parse_failed', raw: sanitized.slice(0, 600) }), { status: 422, headers: { 'Content-Type': 'application/json' } });
     }
   }
 
