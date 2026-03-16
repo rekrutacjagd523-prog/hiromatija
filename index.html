@@ -582,7 +582,7 @@ body { -webkit-overflow-scrolling: touch; }
     <div class="header-rule"><span>✦ ✦ ✦</span></div>
   </header>
 
-  <!-- UPLOAD -->
+  <!-- UPLOAD + OFFER (combined) -->
   <div class="card" id="upload-card">
     <div class="section-label" id="lbl-upload">✦ Изображение ладони</div>
     <div id="drop-zone">
@@ -595,32 +595,38 @@ body { -webkit-overflow-scrolling: touch; }
       <img id="prev-img" alt="palm preview">
       <button class="rm-btn" onclick="removeImg()" id="rm-btn">✕ Удалить</button>
     </div>
-  </div>
 
-  <!-- OFFER -->
-  <div class="card" id="offer-card">
-    <div class="section-label" id="lbl-offer">✦ Полное Прочтение</div>
-    <div class="price-pill">
-      <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
-      <div>
-        <div class="price-amount">$1.99</div>
-        <div class="price-desc" id="price-desc">Одно полное прочтение</div>
+    <!-- OFFER inline — appears after photo -->
+    <div id="offer-card" style="display:none; margin-top:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div class="price-pill" style="margin:0">
+          <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
+          <div>
+            <div class="price-amount">$1.99</div>
+            <div class="price-desc" id="price-desc">Одно полное прочтение</div>
+          </div>
+          <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
+        </div>
+        <ul class="perks" id="perks-list" style="margin:0;flex:1;min-width:180px">
+          <li>5 линий с толкованием</li>
+          <li>Предсказание судьбы</li>
+          <li>Зодиак · Нумерология</li>
+          <li>Мистическое послание</li>
+        </ul>
       </div>
-      <span style="color:var(--gold-l);font-size:1.1rem">⋆</span>
+      <div class="rune-strip" style="margin:10px 0">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ</div>
+      <button class="btn btn-gold" onclick="openStripe()" id="btn-pay">
+        🔮 Открыть Тайну — $1.99
+      </button>
+      <!-- Referral code -->
+      <div id="ref-section" style="margin-top:18px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="ref-input" type="text" placeholder="Реферальный код" style="flex:1;padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(198,153,74,.2);border-radius:6px;color:var(--cream);font-family:inherit;font-size:.85rem;outline:none;">
+          <button onclick="applyRefCode()" style="padding:9px 16px;background:rgba(198,153,74,.15);border:1px solid rgba(198,153,74,.3);border-radius:6px;color:var(--gold);font-family:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;">Применить</button>
+        </div>
+        <p id="ref-msg" style="font-size:.72rem;margin-top:6px;min-height:16px;font-style:italic;color:var(--muted);"></p>
+      </div>
     </div>
-    <ul class="perks" id="perks-list">
-      <li>5 линий ладони с подробным толкованием</li>
-      <li>Предсказание судьбы и жизненного пути</li>
-      <li>Совместимость с знаками Зодиака</li>
-      <li>Нумерология пальцев (числа жизни, души, судьбы)</li>
-      <li>Ладонь с нанесёнными линиями и легендой</li>
-      <li>Персональное мистическое послание</li>
-    </ul>
-    <div class="rune-strip">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ</div>
-    <button class="btn btn-gold" onclick="openStripe()" id="btn-pay">
-      🔮 Открыть Тайну — $1.99
-    </button>
-
   </div>
 
   <!-- LOADING -->
@@ -954,6 +960,7 @@ function handleFile(f){
     dropZone.style.display = 'none';
     document.getElementById('preview-box').style.display = 'block';
     document.getElementById('offer-card').style.display = 'block';
+    document.getElementById('offer-card').scrollIntoView({behavior:'smooth', block:'nearest'});
   };
   reader.readAsDataURL(f);
 }
@@ -963,6 +970,9 @@ function removeImg(){
   document.getElementById('preview-box').style.display = 'none';
   dropZone.style.display = 'block';
   document.getElementById('offer-card').style.display = 'none';
+  document.getElementById('ref-input').value = '';
+  document.getElementById('ref-msg').textContent = '';
+  document.getElementById('ref-msg').style.color = 'var(--muted)';
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1013,6 +1023,27 @@ async function mountStripeCard(){
     });
     stripeReady = true;
   } catch(e){ stripeReady = true; }
+}
+
+
+// ── REFERRAL CODE ──
+const REF_CODE = 'hiromantija21';
+let refValid = false;
+
+function applyRefCode(){
+  const val = document.getElementById('ref-input').value.trim();
+  const msg = document.getElementById('ref-msg');
+  if(val.toLowerCase() === REF_CODE){
+    refValid = true;
+    msg.textContent = '✓ Код принят — прочтение бесплатно!';
+    msg.style.color = 'var(--gold)';
+    document.getElementById('btn-pay').textContent = '🔮 Получить бесплатное прочтение';
+    document.getElementById('btn-pay').onclick = function(){ startReading(); };
+  } else {
+    refValid = false;
+    msg.textContent = '✗ Неверный код';
+    msg.style.color = '#E06060';
+  }
 }
 
 async function openStripe(){
@@ -1073,7 +1104,6 @@ let loadTimer = null;
 
 function startReading(){
   document.getElementById('upload-card').style.display  = 'none';
-  document.getElementById('offer-card').style.display   = 'none';
   document.getElementById('loading-view').style.display = 'block';
 
   let i = 0;
@@ -1462,6 +1492,9 @@ function resetAll(){
   document.getElementById('preview-box').style.display = 'none';
   dropZone.style.display = 'block';
   document.getElementById('offer-card').style.display = 'none';
+  document.getElementById('ref-input').value = '';
+  document.getElementById('ref-msg').textContent = '';
+  document.getElementById('ref-msg').style.color = 'var(--muted)';
   document.getElementById('upload-card').style.display = 'block';
   document.getElementById('result-view').style.display = 'none';
   document.getElementById('r-grid').innerHTML = '';
