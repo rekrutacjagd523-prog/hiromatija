@@ -707,7 +707,7 @@ body { -webkit-overflow-scrolling: touch; }
 
     <div class="action-row">
       <button class="act-btn act-save" onclick="saveAsImage()" id="act-save">💾 Сохранить картинку</button>
-      <button class="act-btn act-new" onclick="shareResult()" style="background:rgba(74,32,112,.25);border-color:rgba(100,60,180,.3);color:#C4A0E8;">📲 Поделиться</button>
+      <button class="act-btn act-new" onclick="shareResult()" id="act-share" style="background:rgba(74,32,112,.25);border-color:rgba(100,60,180,.3);color:#C4A0E8;">📲 Поделиться</button>
     </div>
     <button class="act-btn act-new" onclick="resetAll()" id="act-new" style="width:100%;margin-top:8px;">✦ Новое прочтение</button>
     <div id="share-hint" style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:8px;display:none;">
@@ -800,8 +800,9 @@ const LANGS = {
     'm-secure':   '256-bit SSL · Защищено Stripe',
     'pay-btn-text':'Оплатить $2.99 и Открыть Тайну',
     'm-cancel':   'Отмена',
-    'act-save':   '📜 Сохранить',
-    'act-new':    '✦ Новое',
+    'act-save':   '💾 Сохранить картинку',
+    'act-new':    '✦ Новое прочтение',
+    'act-share':  '📲 Поделиться',
     'disclaimer': 'Хиромантия — искусство самопознания. Результаты носят развлекательный характер.',
     'perks': [
       '5 линий ладони с подробным толкованием',
@@ -847,8 +848,9 @@ const LANGS = {
     'm-secure':   '256-bit SSL · Secured by Stripe',
     'pay-btn-text':'Pay $2.99 & Reveal Mystery',
     'm-cancel':   'Cancel',
-    'act-save':   '📜 Save reading',
+    'act-save':   '💾 Save image',
     'act-new':    '✦ New reading',
+    'act-share':  '📲 Share',
     'disclaimer': 'Palmistry is an art of self-knowledge. Results are for entertainment purposes.',
     'perks': [
       '5 palm lines with in-depth interpretations',
@@ -894,8 +896,9 @@ const LANGS = {
     'm-secure':   '256-bit SSL · Zabezpieczone przez Stripe',
     'pay-btn-text':'Zapłać $2.99 i Odkryj Tajemnicę',
     'm-cancel':   'Anuluj',
-    'act-save':   '📜 Zapisz',
-    'act-new':    '✦ Nowe',
+    'act-save':   '💾 Zapisz obraz',
+    'act-new':    '✦ Nowe odczytanie',
+    'act-share':  '📲 Udostępnij',
     'disclaimer': 'Chiromancja to sztuka samopoznania. Wyniki mają charakter rozrywkowy.',
     'perks': [
       '5 linii dłoni ze szczegółową interpretacją',
@@ -940,8 +943,9 @@ const LANGS = {
     'm-secure':   '256-bit SSL · Захищено Stripe',
     'pay-btn-text':'Оплатити $2.99 і Відкрити Таємницю',
     'm-cancel':   'Скасувати',
-    'act-save':   '📜 Зберегти',
-    'act-new':    '✦ Нове',
+    'act-save':   '💾 Зберегти картинку',
+    'act-new':    '✦ Нове прочитання',
+    'act-share':  '📲 Поділитися',
     'disclaimer': 'Хіромантія — мистецтво самопізнання. Результати мають розважальний характер.',
     'perks': [
       '5 ліній долоні з детальним тлумаченням',
@@ -977,7 +981,7 @@ function setLang(l){
 }
 
 function applyLang(){
-  const ids = ['h-title','h-tag','lbl-upload','drop-title','drop-hint','rm-btn','lbl-offer','price-desc','btn-pay','btn-demo','r-headline','r-tagline','m-title','m-sub','m-secure','pay-btn-text','m-cancel','act-save','act-new','disclaimer'];
+  const ids = ['h-title','h-tag','lbl-upload','drop-title','drop-hint','rm-btn','lbl-offer','price-desc','btn-pay','btn-demo','r-headline','r-tagline','m-title','m-sub','m-secure','pay-btn-text','m-cancel','act-save','act-new','act-share','disclaimer'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if(el) el.innerHTML = T(id);
@@ -1095,13 +1099,24 @@ function applyRefCode(){
   const msg = document.getElementById('ref-msg');
   if(val.toLowerCase() === REF_CODE){
     refValid = true;
-    msg.textContent = '✓ Код принят — прочтение бесплатно!';
+    const okMsg = lang==='uk' ? '✓ Код прийнято — прочитання безкоштовне!' :
+                   lang==='en' ? '✓ Code accepted — free reading!' :
+                   lang==='pl' ? '✓ Kod przyjęty — odczytanie gratis!' :
+                   '✓ Код принят — прочтение бесплатно!';
+    msg.textContent = okMsg;
     msg.style.color = 'var(--gold)';
-    document.getElementById('btn-pay').textContent = '🔮 Получить бесплатное прочтение';
+    const freeBtn = lang==='uk' ? '🔮 Отримати безкоштовне прочитання' :
+                     lang==='en' ? '🔮 Get free reading' :
+                     lang==='pl' ? '🔮 Uzyskaj bezpłatne odczytanie' :
+                     '🔮 Получить бесплатное прочтение';
+    document.getElementById('btn-pay').textContent = freeBtn;
     document.getElementById('btn-pay').onclick = function(){ startReading(); };
   } else {
     refValid = false;
-    msg.textContent = '✗ Неверный код';
+    const errMsg = lang==='uk' ? '✗ Невірний код' :
+                   lang==='en' ? '✗ Invalid code' :
+                   lang==='pl' ? '✗ Nieprawidłowy kod' : '✗ Неверный код';
+    msg.textContent = errMsg;
     msg.style.color = '#E06060';
   }
 }
@@ -1551,12 +1566,17 @@ function drawLines(lines, img){
 // ── SHARE ──
 function shareResult(){
   const url = 'https://hiromatija.pages.dev';
-  const text = '🔮 Узнал(а) свою судьбу по ладони — точность поразила! Попробуй: ' + url;
+  const shareText = lang==='uk' ? '🔮 Дізнався(-лась) свою долю по долоні — точність вразила! Спробуй: '+url :
+                      lang==='en' ? '🔮 Got my palm read by AI — surprisingly accurate! Try it: '+url :
+                      lang==='pl' ? '🔮 Poznałem(-am) swoją przyszłość z dłoni — dokładność zaskoczyła! Spróbuj: '+url :
+                      '🔮 Узнал(а) свою судьбу по ладони — точность поразила! Попробуй: '+url;
+  const text = shareText;
   if(navigator.share){
     navigator.share({ title: 'Мистика Ладони', text, url }).catch(()=>{});
   } else {
     navigator.clipboard.writeText(text).then(()=>{
-      showToast('📋 Скопировано для Stories!');
+      const copiedMsg = lang==='uk'?'📋 Скопійовано!':lang==='en'?'📋 Copied!':lang==='pl'?'📋 Skopiowano!':'📋 Скопировано для Stories!';
+      showToast(copiedMsg);
       document.getElementById('share-hint').style.display = 'block';
     }).catch(()=>{ showToast('🔗 ' + url); });
   }
@@ -1567,7 +1587,8 @@ let lastReadingData = null; // store reading data for card
 
 function saveAsImage(){
   if(!lastReadingData){ showToast('Нет данных для сохранения'); return; }
-  showToast('⏳ Создаём картинку...');
+  const waitMsg = lang==='uk'?'⏳ Створюємо картинку...':lang==='en'?'⏳ Creating image...':lang==='pl'?'⏳ Tworzenie obrazu...':'⏳ Создаём картинку...';
+  showToast(waitMsg);
   const d = lastReadingData;
 
   // Canvas size: 9:16 Stories format
@@ -1653,7 +1674,10 @@ function saveAsImage(){
   c.fillStyle = '#D4A853';
   c.font = 'italic bold 52px "Playfair Display", Georgia, serif';
   c.textAlign = 'center';
-  c.fillText('✦ Мистика Ладони ✦', W/2, 400);
+  const cardTitle = lang==='uk' ? '✦ Містика Долоні ✦' :
+                       lang==='en' ? '✦ Palm Mystic ✦' :
+                       lang==='pl' ? '✦ Mistyka Dłoni ✦' : '✦ Мистика Ладони ✦';
+  c.fillText(cardTitle, W/2, 400);
   c.font = '28px "Cinzel", Georgia, serif';
   c.fillStyle = 'rgba(212,168,83,.5)';
   c.fillText('HIROMATIJA.PAGES.DEV', W/2, 450);
@@ -1728,7 +1752,10 @@ function saveAsImage(){
   // ── NUMEROLOGY ──
   const nums = d.numerology || {};
   if(nums.life_number){
-    const nLabels = ['Число\nЖизни','Число\nДуши','Число\nСудьбы'];
+    const nLabels = lang==='uk' ? ['Число\nЖиття','Число\nДуші','Число\nДолі'] :
+                  lang==='en' ? ['Life\nNumber','Soul\nNumber','Destiny\nNumber'] :
+                  lang==='pl' ? ['Liczba\nŻycia','Liczba\nDuszy','Liczba\nLosu'] :
+                  ['Число\nЖизни','Число\nДуши','Число\nСудьбы'];
     const nVals = [nums.life_number, nums.soul_number, nums.destiny_number];
     const nx = [200, W/2, W-200];
     nVals.forEach((nv, i) => {
@@ -1785,7 +1812,10 @@ function saveAsImage(){
   c.fillStyle = 'rgba(212,168,83,.5)';
   c.font = '26px "Cinzel", Georgia, serif';
   c.textAlign = 'center';
-  c.fillText('Узнай свою судьбу', W/2, 1800);
+  const footerTxt = lang==='uk' ? 'Дізнайся свою долю' :
+                         lang==='en' ? 'Discover your destiny' :
+                         lang==='pl' ? 'Poznaj swoje przeznaczenie' : 'Узнай свою судьбу';
+  c.fillText(footerTxt, W/2, 1800);
   c.fillStyle = 'rgba(212,168,83,.8)';
   c.font = '600 30px "Cinzel", Georgia, serif';
   c.fillText('hiromatija.pages.dev', W/2, 1845);
