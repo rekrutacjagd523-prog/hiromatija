@@ -545,103 +545,24 @@ body { -webkit-overflow-scrolling: touch; }
 }
 
 /* ─── SAVE CARD ─── */
-#save-card {
-  background: linear-gradient(145deg, #0D0820, #180D38);
-  border: 1px solid rgba(212,168,83,.3);
-  border-radius: 16px;
-  padding: 24px 20px;
-  max-width: 400px;
-  margin: 0 auto;
-  position: relative;
-}
-#save-card .save-logo {
-  text-align: center;
-  font-family: var(--font-display);
-  font-style: italic;
-  color: var(--gold);
-  font-size: 1.1rem;
-  letter-spacing: .08em;
-  margin-bottom: 4px;
-}
-#save-card .save-tagline {
-  text-align: center;
-  font-size: .65rem;
-  letter-spacing: .2em;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-#save-card .save-fate {
-  font-family: var(--font-display);
-  font-style: italic;
-  color: var(--cream);
-  font-size: .9rem;
-  line-height: 1.6;
-  text-align: center;
-  padding: 14px;
-  background: rgba(212,168,83,.06);
-  border-radius: 8px;
-  margin-bottom: 14px;
-  border-left: 2px solid var(--gold);
-}
-#save-card .save-lines {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-#save-card .save-line-item {
-  background: rgba(255,255,255,.04);
-  border-radius: 7px;
-  padding: 8px 10px;
-}
-#save-card .save-line-name {
-  font-family: var(--font-accent);
-  font-size: .58rem;
-  letter-spacing: .1em;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-#save-card .save-line-kw {
-  font-size: .72rem;
-  color: #B0A890;
-}
-#save-card .save-nums {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 14px;
-}
-#save-card .save-num {
-  text-align: center;
-}
-#save-card .save-num-big {
-  font-family: var(--font-accent);
-  font-size: 1.4rem;
-  color: #70D0D0;
-}
-#save-card .save-num-lbl {
-  font-size: .6rem;
-  color: var(--muted);
-  letter-spacing: .08em;
-}
-#save-card .save-zodiac {
-  text-align: center;
-  font-size: .72rem;
-  color: #C4A0E8;
-  margin-bottom: 14px;
-}
-#save-card .save-footer {
-  text-align: center;
-  font-size: .6rem;
-  color: var(--muted);
-  letter-spacing: .1em;
-  opacity: .6;
-}
 
+/* ─── GDPR NOTE ─── */
+.gdpr-note {
+  font-family: var(--font-body);
+  font-size: .82rem;
+  color: #B8C8A0;
+  background: rgba(80,120,60,.12);
+  border: 1px solid rgba(100,160,70,.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.gdpr-note strong {
+  color: #C8DCA8;
+  font-weight: 600;
+}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
 
@@ -687,12 +608,17 @@ body { -webkit-overflow-scrolling: touch; }
   <!-- UPLOAD + OFFER (combined) -->
   <div class="card" id="upload-card">
     <div class="section-label" id="lbl-upload">✦ Изображение ладони</div>
+
+    <!-- GDPR privacy note -->
+    <div id="gdpr-ru" class="gdpr-note" style="display:none;">🔒 <strong>Фото удаляется сразу после анализа.</strong> Мы не храним и не передаём ваши изображения третьим лицам.</div>
+    <div id="gdpr-uk" class="gdpr-note" style="display:none;">🔒 <strong>Фото видаляється одразу після аналізу.</strong> Ми не зберігаємо і не передаємо ваші зображення третім особам.</div>
+    <div id="gdpr-en" class="gdpr-note" style="display:none;">🔒 <strong>Your photo is deleted immediately after analysis.</strong> We never store or share your images with third parties.</div>
+    <div id="gdpr-pl" class="gdpr-note" style="display:none;">🔒 <strong>Zdjęcie jest usuwane natychmiast po analizie.</strong> Nie przechowujemy ani nie udostępniamy Twoich zdjęć osobom trzecim.</div>
     <div id="drop-zone">
       <input type="file" id="file-in" accept="image/*" capture="environment">
       <span class="drop-icon">🤚</span>
       <p class="drop-title" id="drop-title">Загрузи фото ладони</p>
       <p class="drop-hint" id="drop-hint">JPG, PNG, WEBP · хорошее освещение, чистый фон</p>
-      <p style="font-size:.68rem;color:var(--muted);margin-top:8px;opacity:.7;">🔒 Фото используется только для анализа и сразу удаляется</p>
     </div>
     <div id="preview-box">
       <img id="prev-img" alt="palm preview">
@@ -1059,6 +985,11 @@ function applyLang(){
   // perks
   const ul = document.getElementById('perks-list');
   if(ul) ul.innerHTML = T('perks').map(p=>`<li>${p}</li>`).join('');
+  // GDPR note — show only for current lang
+  ['ru','uk','en','pl'].forEach(l => {
+    const el = document.getElementById('gdpr-'+l);
+    if(el) el.style.display = l === lang ? 'block' : 'none';
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1637,67 +1568,248 @@ let lastReadingData = null; // store reading data for card
 function saveAsImage(){
   if(!lastReadingData){ showToast('Нет данных для сохранения'); return; }
   showToast('⏳ Создаём картинку...');
-
-  // Build a beautiful save card
   const d = lastReadingData;
-  const card = document.createElement('div');
-  card.id = 'save-card';
-  card.style.position = 'fixed';
-  card.style.left = '-9999px';
-  card.style.top = '0';
-  card.style.width = '400px';
 
-  const topLines = (d.lines||[]).slice(0,4);
-  const nums = d.numerology || {};
-  const zodiac = (d.zodiac_compatible||[]).join(' · ');
+  // Canvas size: 9:16 Stories format
+  const W = 1080, H = 1920;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
 
-  card.innerHTML = `
-    <div class="save-logo">✦ Мистика Ладони ✦</div>
-    <div class="save-tagline">hiromatija.pages.dev</div>
-    <div class="save-fate">${(d.fate_message||'').slice(0,180)}${d.fate_message && d.fate_message.length>180?'…':''}</div>
-    <div class="save-lines">
-      ${topLines.map(l=>`
-        <div class="save-line-item">
-          <div class="save-line-name" style="color:${l.color}">${l.name}</div>
-          <div class="save-line-kw">${(l.keywords||[]).join(' · ')}</div>
-        </div>
-      `).join('')}
-    </div>
-    ${nums.life_number ? `<div class="save-nums">
-      <div class="save-num"><div class="save-num-big">${nums.life_number}</div><div class="save-num-lbl">Жизнь</div></div>
-      <div class="save-num"><div class="save-num-big">${nums.soul_number}</div><div class="save-num-lbl">Душа</div></div>
-      <div class="save-num"><div class="save-num-big">${nums.destiny_number}</div><div class="save-num-lbl">Судьба</div></div>
-    </div>` : ''}
-    ${zodiac ? `<div class="save-zodiac">✦ ${zodiac} ✦</div>` : ''}
-    <div class="save-footer">Узнай свою судьбу · hiromatija.pages.dev</div>
-  `;
+  // ── BACKGROUND: deep space gradient ──
+  const bg = c.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0,   '#06020F');
+  bg.addColorStop(0.4, '#0D0620');
+  bg.addColorStop(1,   '#130830');
+  c.fillStyle = bg; c.fillRect(0, 0, W, H);
 
-  document.body.appendChild(card);
+  // ── RADIAL GLOW top-left purple ──
+  const g1 = c.createRadialGradient(200, 300, 0, 200, 300, 600);
+  g1.addColorStop(0, 'rgba(80,30,160,.35)');
+  g1.addColorStop(1, 'rgba(80,30,160,0)');
+  c.fillStyle = g1; c.fillRect(0, 0, W, H);
 
-  if(typeof html2canvas === 'undefined'){
-    document.body.removeChild(card);
-    // Fallback: just share text
-    const text = (d.fate_message||'').slice(0,200) + '\n\nhiromatija.pages.dev';
-    navigator.clipboard.writeText(text).then(()=>showToast('📋 Текст скопирован!')).catch(()=>{});
-    return;
+  // ── RADIAL GLOW bottom-right ruby ──
+  const g2 = c.createRadialGradient(900, 1600, 0, 900, 1600, 700);
+  g2.addColorStop(0, 'rgba(140,28,28,.25)');
+  g2.addColorStop(1, 'rgba(140,28,28,0)');
+  c.fillStyle = g2; c.fillRect(0, 0, W, H);
+
+  // ── STARS ──
+  const rng = (s) => { let x=s; return ()=>{ x=Math.sin(x)*43758.5453|0; return (x&0xFFFF)/0xFFFF; }; };
+  const rand = rng(42);
+  for(let i=0; i<300; i++){
+    const sx = rand()*W, sy = rand()*H;
+    const sr = rand()*1.8+.3;
+    const sa = rand()*.7+.1;
+    c.beginPath(); c.arc(sx,sy,sr,0,Math.PI*2);
+    c.fillStyle = `rgba(255,248,220,${sa})`; c.fill();
   }
 
-  html2canvas(card, {
-    backgroundColor: '#180D38',
-    scale: 2,
-    useCORS: true,
-    logging: false
-  }).then(canvas => {
-    document.body.removeChild(card);
-    const link = document.createElement('a');
-    link.download = 'moya-sudba.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast('✅ Картинка сохранена!');
-  }).catch(()=>{
-    document.body.removeChild(card);
-    showToast('Ошибка сохранения');
+  // ── DECORATIVE CIRCLE ──
+  c.save();
+  c.strokeStyle = 'rgba(212,168,83,.12)';
+  c.lineWidth = 1;
+  c.beginPath(); c.arc(W/2, 220, 340, 0, Math.PI*2); c.stroke();
+  c.beginPath(); c.arc(W/2, 220, 280, 0, Math.PI*2); c.stroke();
+  c.restore();
+
+  // ── EYE SYMBOL ──
+  c.save();
+  c.strokeStyle = 'rgba(212,168,83,.6)';
+  c.lineWidth = 3;
+  // outer ellipse
+  c.beginPath();
+  c.ellipse(W/2, 220, 110, 55, 0, 0, Math.PI*2);
+  c.stroke();
+  // pupil
+  c.beginPath(); c.arc(W/2, 220, 36, 0, Math.PI*2);
+  c.fillStyle = 'rgba(212,168,83,.15)'; c.fill();
+  c.strokeStyle = 'rgba(212,168,83,.8)'; c.stroke();
+  // iris dot
+  c.beginPath(); c.arc(W/2, 220, 14, 0, Math.PI*2);
+  c.fillStyle = '#D4A853'; c.fill();
+  // shine
+  c.beginPath(); c.arc(W/2-8, 213, 5, 0, Math.PI*2);
+  c.fillStyle = 'rgba(255,255,200,.6)'; c.fill();
+  c.restore();
+
+  // helper: wrap text
+  function wrapText(ctx, text, x, y, maxW, lineH){
+    const words = text.split(' ');
+    let line = '', lines = [];
+    for(const w of words){
+      const test = line + (line?` ${w}`:w);
+      if(ctx.measureText(test).width > maxW && line){ lines.push(line); line=w; }
+      else line = test;
+    }
+    if(line) lines.push(line);
+    lines.forEach((l,i) => ctx.fillText(l, x, y + i*lineH));
+    return lines.length;
+  }
+
+  // ── TITLE ──
+  c.save();
+  c.fillStyle = '#D4A853';
+  c.font = 'italic bold 52px "Playfair Display", Georgia, serif';
+  c.textAlign = 'center';
+  c.fillText('✦ Мистика Ладони ✦', W/2, 400);
+  c.font = '28px "Cinzel", Georgia, serif';
+  c.fillStyle = 'rgba(212,168,83,.5)';
+  c.fillText('HIROMATIJA.PAGES.DEV', W/2, 450);
+  c.restore();
+
+  // ── FATE MESSAGE BOX ──
+  const fateY = 510, fateH = 280;
+  // box bg
+  c.save();
+  c.fillStyle = 'rgba(212,168,83,.07)';
+  roundRect(c, 80, fateY, W-160, fateH, 20);
+  c.fill();
+  // left accent bar
+  c.fillStyle = '#D4A853';
+  roundRect(c, 80, fateY, 5, fateH, 3);
+  c.fill();
+  c.restore();
+
+  // fate text
+  c.save();
+  c.fillStyle = '#F5F0E8';
+  c.font = 'italic 36px "Playfair Display", Georgia, serif';
+  c.textAlign = 'center';
+  const fateMsg = (d.fate_message||'').slice(0, 220) + (d.fate_message&&d.fate_message.length>220?'…':'');
+  wrapText(c, fateMsg, W/2, fateY+55, W-240, 52);
+  c.restore();
+
+  // ── DIVIDER ──
+  c.save();
+  c.strokeStyle = 'rgba(212,168,83,.2)';
+  c.lineWidth = 1;
+  c.beginPath(); c.moveTo(120, 830); c.lineTo(W-120, 830); c.stroke();
+  c.fillStyle = '#D4A853'; c.font = '30px serif'; c.textAlign = 'center';
+  c.fillText('✦', W/2, 838);
+  c.restore();
+
+  // ── LINES GRID (2x2) ──
+  const lines = (d.lines||[]).slice(0,4);
+  const gx = [80, W/2+20], gy = [870, 1080];
+  lines.forEach((ln, i) => {
+    const x = gx[i%2], y = gy[Math.floor(i/2)];
+    const bw = W/2-100;
+    // card bg
+    c.save();
+    c.fillStyle = 'rgba(255,255,255,.04)';
+    roundRect(c, x, y, bw, 170, 14);
+    c.fill();
+    // top color accent
+    c.fillStyle = ln.color || '#D4A853';
+    roundRect(c, x, y, bw, 5, [14,14,0,0]);
+    c.fill();
+    // line name
+    c.fillStyle = ln.color || '#D4A853';
+    c.font = '700 26px "Cinzel", Georgia, serif';
+    c.textAlign = 'left';
+    c.fillText((ln.name||'').toUpperCase(), x+18, y+45);
+    // keywords
+    c.fillStyle = 'rgba(245,240,232,.75)';
+    c.font = '28px "Inter", sans-serif';
+    const kw = (ln.keywords||[]).join('  ·  ');
+    wrapText(c, kw, x+18, y+85, bw-30, 38);
+    c.restore();
   });
+
+  // ── DIVIDER 2 ──
+  c.save();
+  c.strokeStyle = 'rgba(212,168,83,.2)';
+  c.lineWidth = 1;
+  c.beginPath(); c.moveTo(120, 1295); c.lineTo(W-120, 1295); c.stroke();
+  c.restore();
+
+  // ── NUMEROLOGY ──
+  const nums = d.numerology || {};
+  if(nums.life_number){
+    const nLabels = ['Число\nЖизни','Число\nДуши','Число\nСудьбы'];
+    const nVals = [nums.life_number, nums.soul_number, nums.destiny_number];
+    const nx = [200, W/2, W-200];
+    nVals.forEach((nv, i) => {
+      c.save();
+      // circle bg
+      c.beginPath(); c.arc(nx[i], 1390, 58, 0, Math.PI*2);
+      c.fillStyle = 'rgba(112,208,208,.1)'; c.fill();
+      c.strokeStyle = 'rgba(112,208,208,.3)'; c.lineWidth=2; c.stroke();
+      // number
+      c.fillStyle = '#70D0D0';
+      c.font = 'bold 64px "Cinzel", Georgia, serif';
+      c.textAlign = 'center';
+      c.fillText(String(nv), nx[i], 1412);
+      // label
+      c.fillStyle = 'rgba(212,168,83,.7)';
+      c.font = '22px "Cinzel", Georgia, serif';
+      const lparts = nLabels[i].split('\n');
+      lparts.forEach((lp,li) => c.fillText(lp, nx[i], 1475+li*28));
+      c.restore();
+    });
+  }
+
+  // ── ZODIAC ──
+  const zodiac = (d.zodiac_compatible||[]).join('  ·  ');
+  if(zodiac){
+    c.save();
+    c.fillStyle = '#C4A0E8';
+    c.font = '32px "Cinzel", Georgia, serif';
+    c.textAlign = 'center';
+    c.fillText('✦  ' + zodiac + '  ✦', W/2, 1580);
+    c.restore();
+  }
+
+  // ── BOTTOM DIVIDER ──
+  c.save();
+  const lineGrad = c.createLinearGradient(120, 0, W-120, 0);
+  lineGrad.addColorStop(0, 'transparent');
+  lineGrad.addColorStop(0.5, 'rgba(212,168,83,.4)');
+  lineGrad.addColorStop(1, 'transparent');
+  c.strokeStyle = lineGrad; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(120, 1620); c.lineTo(W-120, 1620); c.stroke();
+  c.restore();
+
+  // ── RUNES STRIP ──
+  c.save();
+  c.fillStyle = 'rgba(212,168,83,.35)';
+  c.font = '34px serif';
+  c.textAlign = 'center';
+  c.fillText('ᚠ  ᚢ  ᚦ  ᚨ  ᚱ  ᚲ  ᚷ  ᚹ  ᚺ  ᚾ  ᛁ', W/2, 1690);
+  c.restore();
+
+  // ── FOOTER ──
+  c.save();
+  c.fillStyle = 'rgba(212,168,83,.5)';
+  c.font = '26px "Cinzel", Georgia, serif';
+  c.textAlign = 'center';
+  c.fillText('Узнай свою судьбу', W/2, 1800);
+  c.fillStyle = 'rgba(212,168,83,.8)';
+  c.font = '600 30px "Cinzel", Georgia, serif';
+  c.fillText('hiromatija.pages.dev', W/2, 1845);
+  c.restore();
+
+  // download
+  const link = document.createElement('a');
+  link.download = 'moyo-predskazanie.png';
+  link.href = cv.toDataURL('image/png');
+  link.click();
+  showToast('✅ Картинка сохранена!');
+}
+
+// helper: roundRect polyfill
+function roundRect(ctx, x, y, w, h, r){
+  if(typeof r === 'number') r = [r,r,r,r];
+  const [tl,tr,br,bl] = r;
+  ctx.beginPath();
+  ctx.moveTo(x+tl, y);
+  ctx.lineTo(x+w-tr, y); ctx.arcTo(x+w,y, x+w,y+tr, tr);
+  ctx.lineTo(x+w, y+h-br); ctx.arcTo(x+w,y+h, x+w-br,y+h, br);
+  ctx.lineTo(x+bl, y+h); ctx.arcTo(x,y+h, x,y+h-bl, bl);
+  ctx.lineTo(x, y+tl); ctx.arcTo(x,y, x+tl,y, tl);
+  ctx.closePath();
 }
 
 // ── RESET ──
@@ -1724,8 +1836,20 @@ function showToast(msg){
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-// ── INIT ──
-applyLang();
+// ── INIT: auto-detect browser language ──
+(function(){
+  const nav = (navigator.language || navigator.userLanguage || 'ru').toLowerCase();
+  if(nav.startsWith('uk'))      lang = 'uk';
+  else if(nav.startsWith('pl')) lang = 'pl';
+  else if(nav.startsWith('en')) lang = 'en';
+  else                          lang = 'ru';
+  // Sync active button
+  document.querySelectorAll('.lang-btn').forEach((b,i) => {
+    const codes = ['ru','uk','en','pl'];
+    b.classList.toggle('active', codes[i] === lang);
+  });
+  applyLang();
+})();
 </script>
 </body>
 </html>
