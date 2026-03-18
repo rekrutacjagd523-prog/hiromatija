@@ -543,7 +543,105 @@ body { -webkit-overflow-scrolling: touch; }
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
+
+/* ─── SAVE CARD ─── */
+#save-card {
+  background: linear-gradient(145deg, #0D0820, #180D38);
+  border: 1px solid rgba(212,168,83,.3);
+  border-radius: 16px;
+  padding: 24px 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+}
+#save-card .save-logo {
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--gold);
+  font-size: 1.1rem;
+  letter-spacing: .08em;
+  margin-bottom: 4px;
+}
+#save-card .save-tagline {
+  text-align: center;
+  font-size: .65rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+#save-card .save-fate {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--cream);
+  font-size: .9rem;
+  line-height: 1.6;
+  text-align: center;
+  padding: 14px;
+  background: rgba(212,168,83,.06);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  border-left: 2px solid var(--gold);
+}
+#save-card .save-lines {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#save-card .save-line-item {
+  background: rgba(255,255,255,.04);
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+#save-card .save-line-name {
+  font-family: var(--font-accent);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+#save-card .save-line-kw {
+  font-size: .72rem;
+  color: #B0A890;
+}
+#save-card .save-nums {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+#save-card .save-num {
+  text-align: center;
+}
+#save-card .save-num-big {
+  font-family: var(--font-accent);
+  font-size: 1.4rem;
+  color: #70D0D0;
+}
+#save-card .save-num-lbl {
+  font-size: .6rem;
+  color: var(--muted);
+  letter-spacing: .08em;
+}
+#save-card .save-zodiac {
+  text-align: center;
+  font-size: .72rem;
+  color: #C4A0E8;
+  margin-bottom: 14px;
+}
+#save-card .save-footer {
+  text-align: center;
+  font-size: .6rem;
+  color: var(--muted);
+  letter-spacing: .1em;
+  opacity: .6;
+}
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
 
@@ -682,9 +780,10 @@ body { -webkit-overflow-scrolling: touch; }
     <div class="r-grid" id="r-grid"></div>
 
     <div class="action-row">
-      <button class="act-btn act-save" onclick="shareResult()" id="act-save">📲 Поделиться</button>
-      <button class="act-btn act-new" onclick="resetAll()" id="act-new">✦ Новое</button>
+      <button class="act-btn act-save" onclick="saveAsImage()" id="act-save">💾 Сохранить картинку</button>
+      <button class="act-btn act-new" onclick="shareResult()" style="background:rgba(74,32,112,.25);border-color:rgba(100,60,180,.3);color:#C4A0E8;">📲 Поделиться</button>
     </div>
+    <button class="act-btn act-new" onclick="resetAll()" id="act-new" style="width:100%;margin-top:8px;">✦ Новое прочтение</button>
     <div id="share-hint" style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:8px;display:none;">
       Скопируй ссылку и отправь другу — пусть тоже узнает свою судьбу ✦
     </div>
@@ -1396,6 +1495,7 @@ function getDemoData(){
 // RENDER RESULT
 // ══════════════════════════════════════════════════════════════════
 function renderResult(data){
+  lastReadingData = data;
   // palm image
   const rp = document.getElementById('r-palm');
   if(fileData){ rp.src = fileData; rp.style.display = 'block'; }
@@ -1519,19 +1619,85 @@ function drawLines(lines, img){
 
 // ── SHARE ──
 function shareResult(){
-  const url = window.location.href.split('?')[0];
-  const text = '🔮 Узнала свою судьбу по ладони — точность поразила! Попробуй сама: ' + url;
+  const url = 'https://hiromatija.pages.dev';
+  const text = '🔮 Узнал(а) свою судьбу по ладони — точность поразила! Попробуй: ' + url;
   if(navigator.share){
-    navigator.share({ title: 'Мистика Ладони', text, url })
-      .catch(()=>{});
+    navigator.share({ title: 'Мистика Ладони', text, url }).catch(()=>{});
   } else {
-    navigator.clipboard.writeText(url).then(()=>{
-      showToast('🔗 Ссылка скопирована!');
+    navigator.clipboard.writeText(text).then(()=>{
+      showToast('📋 Скопировано для Stories!');
       document.getElementById('share-hint').style.display = 'block';
-    }).catch(()=>{
-      showToast('🔗 ' + url);
-    });
+    }).catch(()=>{ showToast('🔗 ' + url); });
   }
+}
+
+// ── SAVE AS IMAGE ──
+let lastReadingData = null; // store reading data for card
+
+function saveAsImage(){
+  if(!lastReadingData){ showToast('Нет данных для сохранения'); return; }
+  showToast('⏳ Создаём картинку...');
+
+  // Build a beautiful save card
+  const d = lastReadingData;
+  const card = document.createElement('div');
+  card.id = 'save-card';
+  card.style.position = 'fixed';
+  card.style.left = '-9999px';
+  card.style.top = '0';
+  card.style.width = '400px';
+
+  const topLines = (d.lines||[]).slice(0,4);
+  const nums = d.numerology || {};
+  const zodiac = (d.zodiac_compatible||[]).join(' · ');
+
+  card.innerHTML = `
+    <div class="save-logo">✦ Мистика Ладони ✦</div>
+    <div class="save-tagline">hiromatija.pages.dev</div>
+    <div class="save-fate">${(d.fate_message||'').slice(0,180)}${d.fate_message && d.fate_message.length>180?'…':''}</div>
+    <div class="save-lines">
+      ${topLines.map(l=>`
+        <div class="save-line-item">
+          <div class="save-line-name" style="color:${l.color}">${l.name}</div>
+          <div class="save-line-kw">${(l.keywords||[]).join(' · ')}</div>
+        </div>
+      `).join('')}
+    </div>
+    ${nums.life_number ? `<div class="save-nums">
+      <div class="save-num"><div class="save-num-big">${nums.life_number}</div><div class="save-num-lbl">Жизнь</div></div>
+      <div class="save-num"><div class="save-num-big">${nums.soul_number}</div><div class="save-num-lbl">Душа</div></div>
+      <div class="save-num"><div class="save-num-big">${nums.destiny_number}</div><div class="save-num-lbl">Судьба</div></div>
+    </div>` : ''}
+    ${zodiac ? `<div class="save-zodiac">✦ ${zodiac} ✦</div>` : ''}
+    <div class="save-footer">Узнай свою судьбу · hiromatija.pages.dev</div>
+  `;
+
+  document.body.appendChild(card);
+
+  if(typeof html2canvas === 'undefined'){
+    document.body.removeChild(card);
+    // Fallback: just share text
+    const text = (d.fate_message||'').slice(0,200) + '\n\nhiromatija.pages.dev';
+    navigator.clipboard.writeText(text).then(()=>showToast('📋 Текст скопирован!')).catch(()=>{});
+    return;
+  }
+
+  html2canvas(card, {
+    backgroundColor: '#180D38',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    document.body.removeChild(card);
+    const link = document.createElement('a');
+    link.download = 'moya-sudba.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('✅ Картинка сохранена!');
+  }).catch(()=>{
+    document.body.removeChild(card);
+    showToast('Ошибка сохранения');
+  });
 }
 
 // ── RESET ──
